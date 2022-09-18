@@ -29,11 +29,15 @@ namespace MathQuizCreatorAPI.Models
         }
 
 
-        public List<Quiz> Quizzes { get; set; }
+        public List<Quiz>? Quizzes { get; set; }
 
-        public List<Question> Questions { get; set; }
+        public List<Question>? Questions { get; set; }
 
 
+        public Topic()
+        {
+
+        }
 
         public Topic(string title) : base()
         {

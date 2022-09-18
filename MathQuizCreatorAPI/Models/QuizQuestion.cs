@@ -13,13 +13,13 @@ namespace MathQuizCreatorAPI.Models
 
 
         [Required]
-        public Guid QuizId { get; set; }
+        public Guid? QuizId { get; set; }
 
         private Quiz? _quiz;
 
         [BackingField(nameof(_quiz))]
-        [Required]
-        public Quiz? Quiz {
+        public Quiz? Quiz
+        {
             get => _quiz;
             set
             {
@@ -33,12 +33,11 @@ namespace MathQuizCreatorAPI.Models
         }
 
         [Required]
-        public Guid QuestionId { get; set; }
+        public Guid? QuestionId { get; set; }
 
         private Question? _question;
 
         [BackingField(nameof(_question))]
-        [Required]
         public Question? Question
         {
             get => _question;
@@ -59,6 +58,10 @@ namespace MathQuizCreatorAPI.Models
         public int Order { get; set; }
 
 
+        public QuizQuestion()
+        {
+
+        }
 
         public QuizQuestion(Quiz quiz, Question question, int order)
         {

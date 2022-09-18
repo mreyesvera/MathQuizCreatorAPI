@@ -21,9 +21,13 @@ namespace MathQuizCreatorAPI.Models
 
 
 
-        public List<QuizQuestion> QuizQuestions { get; set; }
+        public List<QuizQuestion>? QuizQuestions { get; set; }
 
 
+        public Quiz()
+        {
+
+        }
 
         public Quiz(string title, string description, bool isPublic, bool hasUnlimitedMode, Topic topic)
         : base(title, description, topic)
@@ -31,7 +35,6 @@ namespace MathQuizCreatorAPI.Models
             QuizId = Guid.NewGuid();
             IsPublic = isPublic;
             HasUnlimitedMode = hasUnlimitedMode;
-            QuizQuestions = new List<QuizQuestion>();
         }
 
     }

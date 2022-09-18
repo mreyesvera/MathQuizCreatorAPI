@@ -15,29 +15,29 @@ namespace MathQuizCreatorAPI.Models
         [Required]
         public bool Values { get; set; }
 
-        public enum XorZValues
+        public enum NormalDistributionType
         {
             X,
             Z
         };
 
-        private XorZValues _xorz;
+        private NormalDistributionType _distributionType;
 
-        [BackingField(nameof(_xorz))]
+        [BackingField(nameof(_distributionType))]
         [Required]
-        public XorZValues XorZ {
+        public NormalDistributionType DistributionType {
             get
             {
-                return _xorz;
+                return _distributionType;
             }
             set 
             {
-                if (!Enum.IsDefined(typeof(XorZValues), value)) // might be unnecessary
+                if (!Enum.IsDefined(typeof(NormalDistributionType), value)) // might be unnecessary
                 {
-                    throw new ArgumentException("xorz should be one of the following values: " + Enum.GetValues(typeof(XorZValues)));
+                    throw new ArgumentException("xorz should be one of the following values: " + Enum.GetValues(typeof(NormalDistributionType)));
                 }
 
-                _xorz = value;
+                _distributionType = value;
             } 
         }
 
@@ -53,7 +53,7 @@ namespace MathQuizCreatorAPI.Models
             }
             set
             {
-                if (XorZ == XorZValues.Z) // double check if this is ok?
+                if (DistributionType == NormalDistributionType.Z) // double check if this is ok?
                 {
                     if (value != 0)
                         throw new ArgumentException("In a z-distribution the mean should be 0");
@@ -75,7 +75,7 @@ namespace MathQuizCreatorAPI.Models
             }
             set
             {
-                if (XorZ == XorZValues.Z) // double check if this is ok?
+                if (DistributionType == NormalDistributionType.Z) // double check if this is ok?
                 {
                     if (value != 0)
                         throw new ArgumentException("In a z-distribution the standard deviation should be 1");
@@ -125,13 +125,11 @@ namespace MathQuizCreatorAPI.Models
 
 
 
-        [Required]
-        public Guid QuestionId { get; set; }
+        public Guid? QuestionId { get; set; }
 
         private Question? _question;
 
         [BackingField(nameof(_question))]
-        [Required]
         public Question? Question
         {
             get => _question;
@@ -146,23 +144,26 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
+        public NormalDistribution()
+        {
 
+        }
 
-        public NormalDistribution(bool values, string xorz, double mean, double stdv, double min, double max, double area, string color, Question question)
+        public NormalDistribution(bool values, string distributionType, double mean, double standardDeviation, double min, double max, double area, string color, Question question)
         {
             NormalDistributionId = Guid.NewGuid();
 
             Values = values;
 
-            if(!Enum.TryParse(xorz, out XorZValues xorzenum))
+            if(!Enum.TryParse(distributionType, out NormalDistributionType distributionTypeEnum))
             {
-                throw new ArgumentException("xorz should be one of the following values: " + Enum.GetValues(typeof(XorZValues)));
+                throw new ArgumentException("xorz should be one of the following values: " + Enum.GetValues(typeof(NormalDistributionType)));
             }
 
-            XorZ = xorzenum;
+            DistributionType = distributionTypeEnum;
 
             Mean = mean;
-            StandardDeviation = stdv;
+            StandardDeviation = standardDeviation;
 
             Min = min;
             Max = max;

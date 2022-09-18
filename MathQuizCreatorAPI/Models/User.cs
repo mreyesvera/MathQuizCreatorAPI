@@ -63,13 +63,11 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
-        [Required]
-        public Guid RoleId { get; set; }
+        public Guid? RoleId { get; set; }
 
         private Role? _role;
 
         [BackingField(nameof(_role))]
-        [Required]
         public Role? Role {
             get => _role;
             set
@@ -83,6 +81,11 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
+
+        public User()
+        {
+
+        }
 
         public User(string email, string username, string password, Role role) : base()
         {

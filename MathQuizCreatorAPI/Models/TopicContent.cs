@@ -46,7 +46,6 @@ namespace MathQuizCreatorAPI.Models
         private Topic? _topic;
 
         [BackingField(nameof(_topic))]
-        [Required]
         public Topic? Topic
         {
             get => _topic;
@@ -61,8 +60,12 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
-        [Required]
-        public Guid TopicId { get; set; }
+        public Guid? TopicId { get; set; }
+
+        public TopicContent()
+        {
+
+        }
 
         public TopicContent(string title, string description, Topic topic) : base()
         {

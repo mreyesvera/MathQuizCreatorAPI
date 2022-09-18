@@ -29,16 +29,18 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
-        public List<QuizQuestion> QuizQuestions { get; set; }
+        public List<QuizQuestion>? QuizQuestions { get; set; }
 
+        public Question()
+        {
 
+        }
 
         public Question(string title, string description, string answer, Topic topic)
         : base (title, description, topic)
         {
             QuestionId = Guid.NewGuid();
             Answer = answer;
-            QuizQuestions = new List<QuizQuestion>();
         }
     }
 }

@@ -12,13 +12,11 @@ namespace MathQuizCreatorAPI.Models
 
 
 
-        [Required]
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
 
         private User? _user;
 
         [BackingField(nameof(_user))]
-        [Required]
         public User? User
         {
             get => _user;
@@ -33,13 +31,11 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
-        [Required]
-        public Guid QuizId { get; set; }
+        public Guid? QuizId { get; set; }
 
         private Quiz? _quiz;
 
         [BackingField(nameof(_quiz))]
-        [Required]
         public Quiz? Quiz
         {
             get => _quiz;
@@ -100,6 +96,10 @@ namespace MathQuizCreatorAPI.Models
         public double Score { get; set; }
 
 
+        public SolvedQuiz()
+        {
+
+        }
 
         public SolvedQuiz(User user, Quiz quiz, int correctResponses, int incorrectResponses)
         : base()

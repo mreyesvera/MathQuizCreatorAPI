@@ -68,13 +68,11 @@ namespace MathQuizCreatorAPI.Models
 
 
 
-        [Required]
-        public Guid QuestionId { get; set; }
+        public Guid? QuestionId { get; set; }
 
         private Question? _question;
 
         [BackingField(nameof(_question))]
-        [Required]
         public Question? Question { 
             get => _question;
             set
@@ -89,7 +87,10 @@ namespace MathQuizCreatorAPI.Models
         }
 
 
+        public Parameter()
+        {
 
+        }
         public Parameter(string name, string value, int order, Question question)
         {
             ParameterId = Guid.NewGuid();
