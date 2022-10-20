@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
+using MathQuizCreatorAPI.DTOs;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -23,9 +24,58 @@ namespace MathQuizCreatorAPI.Controllers
 
         // GET: api/Topics
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Topic>>> GetTopics()
+        public async Task<ActionResult<IEnumerable<TopicDeepDto>>> GetTopics()
         {
-            return await _context.Topics.ToListAsync();
+            // TO DO: Later filter this by the user that is sending the request
+            // also will need to check that they have the appropriate role?
+            // maybe not, because if they are not a creator they won't have any quizzes
+            var topics = await _context.Topics
+                .Include(topic => topic.Questions)
+                .Include(topic => topic.Quizzes).ToListAsync();
+
+            var topicsDto = new List<TopicDeepDto>();
+
+            foreach (var topic in topics)
+            {
+                var questionsDto = new List<QuestionSimplifiedDto>();
+                foreach(var question in topic.Questions)
+                {
+                    questionsDto.Add(new QuestionSimplifiedDto()
+                    {
+                        QuestionId = question.QuestionId,
+                        Title = question.Title,
+                        Description = question.Description,
+                        LastModifiedTime = question.LastModifiedTime,
+                        CreationTime = question.CreationTime
+                    });
+                }
+
+                var quizzesDto = new List<QuizSimplifiedDto>();
+                foreach(var quiz in topic.Quizzes)
+                {
+                    quizzesDto.Add(new QuizSimplifiedDto()
+                    {
+                        QuizId = quiz.QuizId,
+                        Title = quiz.Title,
+                        Description = quiz.Description,
+                        IsPublic = quiz.IsPublic,
+                        HasUnlimitedMode = quiz.HasUnlimitedMode,
+                        LastModifiedTime = quiz.LastModifiedTime,
+                        CreationTime = quiz.CreationTime
+                    });
+                }
+                var topicDto = new TopicDeepDto()
+                {
+                    TopicId = topic.TopicId,
+                    Title = topic.Title,
+                    Questions = questionsDto,
+                    Quizzes = quizzesDto
+                };
+
+                topicsDto.Add(topicDto);
+            }
+
+            return topicsDto;
         }
 
         // GET: api/Topics/5
@@ -33,6 +83,7 @@ namespace MathQuizCreatorAPI.Controllers
         public async Task<ActionResult<Topic>> GetTopic(Guid id)
         {
             var topic = await _context.Topics.FindAsync(id);
+
 
             if (topic == null)
             {

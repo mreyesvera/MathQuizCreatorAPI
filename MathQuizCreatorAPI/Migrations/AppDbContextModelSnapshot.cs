@@ -60,7 +60,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("NormalDistributions");
+                    b.ToTable("NormalDistributions", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.Parameter", b =>
@@ -87,7 +87,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Parameters");
+                    b.ToTable("Parameters", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.Question", b =>
@@ -121,7 +121,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Questions", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.Quiz", b =>
@@ -157,7 +157,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("TopicId");
 
-                    b.ToTable("Quizzes");
+                    b.ToTable("Quizzes", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.QuizQuestion", b =>
@@ -183,7 +183,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("QuizId");
 
-                    b.ToTable("QuizQuestions");
+                    b.ToTable("QuizQuestions", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.Role", b =>
@@ -204,7 +204,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasKey("RoleId");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.SolvedQuiz", b =>
@@ -243,7 +243,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SolvedQuizzes");
+                    b.ToTable("SolvedQuizzes", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.Topic", b =>
@@ -264,7 +264,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasKey("TopicId");
 
-                    b.ToTable("Topics");
+                    b.ToTable("Topics", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.User", b =>
@@ -298,7 +298,7 @@ namespace MathQuizCreatorAPI.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("MathQuizCreatorAPI.Models.NormalDistribution", b =>

@@ -39,6 +39,16 @@ namespace MathQuizCreatorAPI.Controllers
                 return NotFound();
             }
 
+            var topic = await _context.Topics.FindAsync(quiz.TopicId);
+
+            if (topic == null)
+                throw new ArgumentException("Invalid topic id.");
+
+            topic.Quizzes = null;
+
+            quiz.Topic = topic;
+
+
             return quiz;
         }
 
@@ -78,6 +88,22 @@ namespace MathQuizCreatorAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Quiz>> PostQuiz(Quiz quiz)
         {
+            Guid? topicId = quiz.TopicId;
+
+            if(topicId == null)
+            {
+                throw new ArgumentException("Topic id can't be empty.");
+            }
+
+            Topic topic = await _context.Topics.Where(topic => topic.TopicId == topicId).SingleOrDefaultAsync();
+
+            if(topic == null)
+            {
+                throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+            }
+
+            quiz.Topic = topic;
+
             _context.Quizzes.Add(quiz);
             await _context.SaveChangesAsync();
 
