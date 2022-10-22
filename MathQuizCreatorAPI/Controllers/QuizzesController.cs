@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
+using System.Drawing;
+using MathQuizCreatorAPI.DTOs;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -21,6 +23,39 @@ namespace MathQuizCreatorAPI.Controllers
             _context = context;
         }
 
+        private async Task<string> GetAssignedQuizzes(Guid questionId)
+        {
+            var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuestionId == questionId).ToListAsync();
+            string assignedQuizzes = "";
+
+            foreach(var quizQuestion in quizQuestions)
+            {
+                assignedQuizzes += $"{quizQuestion.Quiz.Title}\n";
+            }
+
+            return assignedQuizzes;
+        }
+
+        private async Task<QuestionSimplifiedDto> GetQuestionSimplified(Guid? questionId)
+        {
+            var question = await _context.Questions.Where(question => question.QuestionId == questionId).FirstOrDefaultAsync();
+
+            if(questionId == null)
+            {
+                return null;
+            }
+
+            var questionSimplified = new QuestionSimplifiedDto()
+            {
+                QuestionId = questionId ?? Guid.Empty,
+                Title = question.Title,
+                Description = question.Description,
+                AssignedQuizzes = await GetAssignedQuizzes(questionId ?? Guid.Empty)
+            };
+
+            return questionSimplified;
+        }
+
         // GET: api/Quizzes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizzes()
@@ -28,28 +63,57 @@ namespace MathQuizCreatorAPI.Controllers
             return await _context.Quizzes.ToListAsync();
         }
 
+        private async Task<List<QuizQuestionQuestionDeepDto>> GetQuizQuestionsQuestionDeep(Guid quizQuestionId)
+        {
+            var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuizId == quizQuestionId).ToListAsync();
+
+            var quizQuestionsQuestions = new List<QuizQuestionQuestionDeepDto>();
+
+            foreach(var quizQuestion in quizQuestions)
+            {
+                quizQuestionsQuestions.Add(new QuizQuestionQuestionDeepDto()
+                {
+                    QuizQuestionId = quizQuestion.QuizQuestionId,
+                    QuestionId = quizQuestion.QuestionId,
+                    Question = await GetQuestionSimplified(quizQuestion.QuestionId),
+                    Order = quizQuestion.Order
+                });
+            }
+
+            return quizQuestionsQuestions;
+        }
+
         // GET: api/Quizzes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Quiz>> GetQuiz(Guid id)
+        public async Task<ActionResult<QuizDeepDto>> GetQuiz(Guid id)
         {
-            var quiz = await _context.Quizzes.FindAsync(id);
+            var quiz = await _context.Quizzes.Include(quiz => quiz.Topic).Include(quiz => quiz.QuizQuestions).FirstOrDefaultAsync();
 
             if (quiz == null)
             {
                 return NotFound();
             }
 
-            var topic = await _context.Topics.FindAsync(quiz.TopicId);
+            var quizDeep = new QuizDeepDto()
+            {
+                QuizId = quiz.QuizId,
+                Title = quiz.Title,
+                Description = quiz.Description,
+                IsPublic = quiz.IsPublic,
+                HasUnlimitedMode = quiz.HasUnlimitedMode,
+                LastModifiedTime = quiz.LastModifiedTime,
+                CreationTime = quiz.CreationTime,
+                Topic = new TopicSimplifiedDto()
+                {
+                    TopicId = quiz.Topic.TopicId,
+                    Title = quiz.Topic.Title
+                },
+                QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
 
-            if (topic == null)
-                throw new ArgumentException("Invalid topic id.");
-
-            topic.Quizzes = null;
-
-            quiz.Topic = topic;
+            };
 
 
-            return quiz;
+            return quizDeep;
         }
 
         // PUT: api/Quizzes/5

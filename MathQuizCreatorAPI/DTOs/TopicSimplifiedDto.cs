@@ -1,12 +1,9 @@
 ﻿using MathQuizCreatorAPI.Models;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
-using Microsoft.EntityFrameworkCore;
 
 namespace MathQuizCreatorAPI.DTOs
 {
-    [JsonObject]
-    public class TopicDeepDto : Entity
+    public class TopicSimplifiedDto : Entity
     {
         [Required]
         public Guid TopicId { get; set; }
@@ -14,9 +11,5 @@ namespace MathQuizCreatorAPI.DTOs
         [Required]
         public string Title { get; set; }
 
-
-        public List<QuizSimplifiedDto>? Quizzes { get; set; }
-
-        public List<QuestionSimplifiedDto>? Questions { get; set; }
     }
 }

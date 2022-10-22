@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using MathQuizCreatorAPI.DTOs;
+using Microsoft.AspNetCore.Cors;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -22,8 +23,22 @@ namespace MathQuizCreatorAPI.Controllers
             _context = context;
         }
 
+        private async Task<string> GetAssignedQuizzes(Guid id)
+        {
+            var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuestionId == id).ToListAsync();
+            string assignedQuizzes = "";
+
+            foreach (var quizQuestion in quizQuestions)
+            {
+                assignedQuizzes += $"{quizQuestion.Quiz.Title}\n";
+            }
+
+            return assignedQuizzes;
+        }
+
         // GET: api/Topics
         [HttpGet]
+        [EnableCors("ReactApp")]
         public async Task<ActionResult<IEnumerable<TopicDeepDto>>> GetTopics()
         {
             // TO DO: Later filter this by the user that is sending the request
@@ -46,7 +61,8 @@ namespace MathQuizCreatorAPI.Controllers
                         Title = question.Title,
                         Description = question.Description,
                         LastModifiedTime = question.LastModifiedTime,
-                        CreationTime = question.CreationTime
+                        CreationTime = question.CreationTime,
+                        AssignedQuizzes = await GetAssignedQuizzes(question.QuestionId)
                     });
                 }
 
