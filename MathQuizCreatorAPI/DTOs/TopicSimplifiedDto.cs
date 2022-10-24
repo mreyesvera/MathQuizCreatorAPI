@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace MathQuizCreatorAPI.DTOs
 {
-    public class TopicSimplifiedDto : Entity
+    public class TopicSimplifiedDto
     {
         [Required]
         public Guid TopicId { get; set; }

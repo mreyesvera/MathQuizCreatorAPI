@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
+using MathQuizCreatorAPI.DTOs;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -30,27 +31,56 @@ namespace MathQuizCreatorAPI.Controllers
 
         // GET: api/Questions/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Question>> GetQuestion(Guid id)
+        public async Task<ActionResult<QuestionDeepDto>> GetQuestion(Guid id)
         {
-            var question = await _context.Questions.FindAsync(id);
+            var question = await _context.Questions
+                .Where(question => question.QuestionId == id)
+                .Include(question => question.Topic)
+                .FirstOrDefaultAsync();
 
             if (question == null)
             {
                 return NotFound();
             }
 
-            return question;
+            var questionDeep = new QuestionDeepDto()
+            {
+                QuestionId = question.QuestionId,
+                Title = question.Title,
+                Description = question.Description,
+                Answer = question.Answer,
+                Topic = new TopicSimplifiedDto()
+                {
+                    TopicId = question.Topic.TopicId,
+                    Title = question.Topic.Title
+                },
+                LastModifiedTime = question.LastModifiedTime,
+                CreationTime = question.CreationTime
+            };
+
+            return questionDeep;
         }
 
         // PUT: api/Questions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuestion(Guid id, Question question)
+        public async Task<IActionResult> PutQuestion(Guid id, QuestionEditDto questionEdit)
         {
-            if (id != question.QuestionId)
+            if (id != questionEdit.QuestionId)
             {
                 return BadRequest();
             }
+
+            var question = await _context.Questions.Where(question => question.QuestionId == id).FirstOrDefaultAsync();
+
+            if (question == null)
+            {
+                return NotFound();
+            }
+
+            question.Title = questionEdit.Title;
+            question.Description = questionEdit.Description;
+            question.Answer = questionEdit.Answer;
 
             _context.Entry(question).State = EntityState.Modified;
 

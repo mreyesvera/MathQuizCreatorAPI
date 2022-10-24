@@ -20,6 +20,9 @@ namespace MathQuizCreatorAPI.DTOs
         [Required]
         public string Description { get; set; }
 
+        [Required]
+        public UserSimplifiedDto Creator { get; set; }
+
         public List<QuizQuestionQuestionDeepDto>? QuizQuestions { get; set; }
 
         public TopicSimplifiedDto? Topic { get; set; }

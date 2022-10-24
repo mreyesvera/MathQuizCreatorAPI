@@ -19,6 +19,22 @@ namespace MathQuizCreatorAPI.Models
         [Required]
         public bool HasUnlimitedMode { get; set; }
 
+        private User? _creator;
+
+        [BackingField(nameof(_creator))]
+
+        public User? Creator {
+            get => _creator;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException("Creator can't be null");
+                }
+
+                _creator = value;
+            }
+        }
 
 
         public List<QuizQuestion>? QuizQuestions { get; set; }
@@ -29,12 +45,13 @@ namespace MathQuizCreatorAPI.Models
 
         }
 
-        public Quiz(string title, string description, bool isPublic, bool hasUnlimitedMode, Topic topic)
+        public Quiz(string title, string description, bool isPublic, bool hasUnlimitedMode, Topic topic, User creator)
         : base(title, description, topic)
         {
             QuizId = Guid.NewGuid();
             IsPublic = isPublic;
             HasUnlimitedMode = hasUnlimitedMode;
+            Creator = creator;
         }
 
     }

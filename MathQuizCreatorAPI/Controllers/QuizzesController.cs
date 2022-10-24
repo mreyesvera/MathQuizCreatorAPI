@@ -87,7 +87,13 @@ namespace MathQuizCreatorAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<QuizDeepDto>> GetQuiz(Guid id)
         {
-            var quiz = await _context.Quizzes.Include(quiz => quiz.Topic).Include(quiz => quiz.QuizQuestions).FirstOrDefaultAsync();
+            var quiz = await _context.Quizzes
+                .Where(quiz => quiz.QuizId == id)
+                .Include(quiz => quiz.Topic)
+                .Include(quiz => quiz.QuizQuestions)
+                .Include(quiz => quiz.Creator)
+                .Include(quiz => quiz.Creator.Role)
+                .FirstOrDefaultAsync();
 
             if (quiz == null)
             {
@@ -108,6 +114,17 @@ namespace MathQuizCreatorAPI.Controllers
                     TopicId = quiz.Topic.TopicId,
                     Title = quiz.Topic.Title
                 },
+                Creator = new UserSimplifiedDto()
+                {
+                    UserId = quiz.Creator.UserId,
+                    Email = quiz.Creator.Email,
+                    Username = quiz.Creator.Username,
+                    Role = new RoleSimplifiedDto()
+                    {
+                        RoleId = quiz.Creator.Role.RoleId,
+                        Title = quiz.Creator.Role.Title
+                    },
+                },
                 QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
 
             };
@@ -119,12 +136,24 @@ namespace MathQuizCreatorAPI.Controllers
         // PUT: api/Quizzes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutQuiz(Guid id, Quiz quiz)
+        public async Task<IActionResult> PutQuiz(Guid id, QuizEditDto quizEdit)
         {
-            if (id != quiz.QuizId)
+            if (id != quizEdit.QuizId)
             {
                 return BadRequest();
             }
+
+            var quiz = await _context.Quizzes.Where(quiz => quiz.QuizId == id).FirstOrDefaultAsync();
+
+            if (quiz == null)
+            {
+                return NotFound();
+            }
+
+            quiz.Title = quizEdit.Title;
+            quiz.Description = quizEdit.Description;
+            quiz.IsPublic = quizEdit.IsPublic;
+            quiz.HasUnlimitedMode = quizEdit.HasUnlimitedMode;
 
             _context.Entry(quiz).State = EntityState.Modified;
 
@@ -150,28 +179,59 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Quizzes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Quiz>> PostQuiz(Quiz quiz)
+        public async Task<ActionResult<QuizSimplifiedDto>> PostQuiz(QuizAddDto quizAdd)
         {
-            Guid? topicId = quiz.TopicId;
+            Guid? topicId = quizAdd.TopicId;
 
-            if(topicId == null)
+            if (topicId == null)
             {
                 throw new ArgumentException("Topic id can't be empty.");
             }
 
             Topic topic = await _context.Topics.Where(topic => topic.TopicId == topicId).SingleOrDefaultAsync();
 
-            if(topic == null)
+            if (topic == null)
             {
                 throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
             }
 
-            quiz.Topic = topic;
+            Guid? creatorId = quizAdd.CreatorId;
+
+            if (creatorId == null)
+            {
+                throw new ArgumentException("Creatr id can't be empty.");
+            }
+
+            User creator = await _context.Users.Where(creator => creator.UserId == creatorId).SingleOrDefaultAsync();
+
+            if (creator == null)
+            {
+                throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+            }
+
+            var quiz = new Quiz()
+            {
+                Title = quizAdd.Title,
+                Description = quizAdd.Description,
+                IsPublic = quizAdd.IsPublic,
+                HasUnlimitedMode = quizAdd.HasUnlimitedMode,
+                Topic = topic,
+                Creator = creator,
+            };
 
             _context.Quizzes.Add(quiz);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuiz", new { id = quiz.QuizId }, quiz);
+            var quizSimplified = new QuizSimplifiedDto()
+            {
+                QuizId = quiz.QuizId,
+                Title = quiz.Title,
+                Description = quiz.Description,
+                IsPublic = quiz.IsPublic,
+                HasUnlimitedMode = quiz.HasUnlimitedMode,
+            };
+
+            return CreatedAtAction("GetQuiz", new { id = quiz.QuizId }, quizSimplified);
         }
 
         // DELETE: api/Quizzes/5
