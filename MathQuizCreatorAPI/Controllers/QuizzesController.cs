@@ -50,6 +50,7 @@ namespace MathQuizCreatorAPI.Controllers
                 QuestionId = questionId ?? Guid.Empty,
                 Title = question.Title,
                 Description = question.Description,
+                Answer = question.Answer,
                 AssignedQuizzes = await GetAssignedQuizzes(questionId ?? Guid.Empty)
             };
 
@@ -206,7 +207,7 @@ namespace MathQuizCreatorAPI.Controllers
 
             if (creator == null)
             {
-                throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+                throw new ArgumentException("Creator couldn't be found with the given Creator Id.");
             }
 
             var quiz = new Quiz()

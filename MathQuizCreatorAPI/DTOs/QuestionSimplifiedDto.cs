@@ -16,6 +16,9 @@ namespace MathQuizCreatorAPI.DTOs
         [Required]
         public string Description { get; set; }
 
+        [Required]
+        public string? Answer { get; set; }
+
         public string AssignedQuizzes { get; set; }
 
         //public QuestionSimplifiedDto(Guid questionId, string title, string description)

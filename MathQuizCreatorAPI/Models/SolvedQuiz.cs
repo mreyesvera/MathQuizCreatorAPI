@@ -67,6 +67,7 @@ namespace MathQuizCreatorAPI.Models
 
                 _correctResponses = value;
                 TotalQuestions = IncorrectResponses + _correctResponses;
+                Score = (double) _correctResponses / TotalQuestions;
             }
         }
 
@@ -86,6 +87,7 @@ namespace MathQuizCreatorAPI.Models
 
                 _incorrectResponses = value;
                 TotalQuestions = CorrectResponses + _incorrectResponses;
+                Score = (double)CorrectResponses / TotalQuestions;
             }
         }
 

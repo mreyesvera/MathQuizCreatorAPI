@@ -25,7 +25,9 @@ namespace MathQuizCreatorAPI.Controllers
 
         private async Task<string> GetAssignedQuizzes(Guid id)
         {
-            var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuestionId == id).ToListAsync();
+            var quizQuestions = await _context.QuizQuestions
+                .Include(quizQuestion => quizQuestion.Quiz)
+                .Where(quizQuestion => quizQuestion.QuestionId == id).ToListAsync();
             string assignedQuizzes = "";
 
             foreach (var quizQuestion in quizQuestions)

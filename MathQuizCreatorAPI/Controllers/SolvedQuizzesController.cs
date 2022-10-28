@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
+using MathQuizCreatorAPI.DTOs;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -23,9 +24,27 @@ namespace MathQuizCreatorAPI.Controllers
 
         // GET: api/SolvedQuizzes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<SolvedQuiz>>> GetSolvedQuizzes()
+        public async Task<ActionResult<IEnumerable<SolvedQuizSimplifiedDto>>> GetSolvedQuizzes(Guid? quizId)
         {
-            return await _context.SolvedQuizzes.ToListAsync();
+            var solvedQuizzes = await _context.SolvedQuizzes
+                .Where(solvedQuiz => (quizId == null || solvedQuiz.QuizId == quizId))
+                .ToListAsync();
+
+            var solvedQuizzesSimplified = new List<SolvedQuizSimplifiedDto>();
+
+            foreach(var solvedQuiz in solvedQuizzes)
+            {
+                solvedQuizzesSimplified.Add(new SolvedQuizSimplifiedDto()
+                {
+                    SolvedQuizId = solvedQuiz.SolvedQuizId,
+                    CorrectResponses = solvedQuiz.CorrectResponses,
+                    IncorrectResponses = solvedQuiz.IncorrectResponses,
+                    TotalQuestions = solvedQuiz.TotalQuestions,
+                    Score = solvedQuiz.Score
+                });
+            }   
+
+            return solvedQuizzesSimplified;
         }
 
         // GET: api/SolvedQuizzes/5

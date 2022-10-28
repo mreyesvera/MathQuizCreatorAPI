@@ -29,6 +29,24 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
+        private User? _creator;
+
+        [BackingField(nameof(_creator))]
+
+        public User? Creator
+        {
+            get => _creator;
+            set
+            {
+                if (value == null)
+                {
+                    throw new ArgumentException("Creator can't be null");
+                }
+
+                _creator = value;
+            }
+        }
+
         public List<QuizQuestion>? QuizQuestions { get; set; }
 
         public Question()

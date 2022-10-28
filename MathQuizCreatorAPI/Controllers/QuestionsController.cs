@@ -22,11 +22,47 @@ namespace MathQuizCreatorAPI.Controllers
             _context = context;
         }
 
+        private async Task<string> GetAssignedQuizzes(Guid questionId)
+        {
+            var quizQuestions = await _context.QuizQuestions
+                .Include(quizQuestion => quizQuestion.Quiz)
+                .Where(quizQuestion => quizQuestion.QuestionId == questionId).ToListAsync();
+            string assignedQuizzes = "";
+
+            foreach (var quizQuestion in quizQuestions)
+            {
+                assignedQuizzes += $"{quizQuestion.Quiz.Title}\n";
+            }
+
+            return assignedQuizzes;
+        }
+
         // GET: api/Questions
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Question>>> GetQuestions()
+        public async Task<ActionResult<IEnumerable<QuestionSimplifiedDto>>> GetQuestions(Guid? topicId = null)
         {
-            return await _context.Questions.ToListAsync();
+            var questions = await _context.Questions
+                .Include(question => question.Topic)
+                .Include(question => question.QuizQuestions)
+                .Where(question => (topicId == null || question.Topic.TopicId == topicId)).ToListAsync();
+
+            var questionsSimplified = new List<QuestionSimplifiedDto>();
+
+            foreach(var question in questions)
+            {
+                questionsSimplified.Add(new QuestionSimplifiedDto()
+                {
+                    QuestionId = question.QuestionId,
+                    Title = question.Title,
+                    Description = question.Description,
+                    Answer = question.Answer,
+                    AssignedQuizzes = await GetAssignedQuizzes(question.QuestionId),
+                    LastModifiedTime = question.LastModifiedTime,
+                    CreationTime = question.CreationTime,
+                });
+            }
+
+            return questionsSimplified;
         }
 
         // GET: api/Questions/5
@@ -106,12 +142,60 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Questions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Question>> PostQuestion(Question question)
+        public async Task<ActionResult<QuestionSimplifiedDto>> PostQuestion(QuestionAddDto questionAdd)
         {
+
+            Guid? topicId = questionAdd.TopicId;
+
+            if (topicId == null)
+            {
+                throw new ArgumentException("Topic id can't be empty.");
+            }
+
+            Topic topic = await _context.Topics.Where(topic => topic.TopicId == topicId).SingleOrDefaultAsync();
+
+            if (topic == null)
+            {
+                throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+            }
+
+            Guid? creatorId = questionAdd.CreatorId;
+
+            if (creatorId == null)
+            {
+                throw new ArgumentException("Creator id can't be empty.");
+            }
+
+            User creator = await _context.Users.Where(creator => creator.UserId == creatorId).SingleOrDefaultAsync();
+
+            if (creator == null)
+            {
+                throw new ArgumentException("Creator couldn't be found with the given Creator Id.");
+            }
+
+            var question = new Question()
+            {
+                Title = questionAdd.Title,
+                Description = questionAdd.Description,
+                Answer = questionAdd.Answer,
+                Topic = topic,
+                Creator = creator,
+            };
+
             _context.Questions.Add(question);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetQuestion", new { id = question.QuestionId }, question);
+            var questionSimplified = new QuestionSimplifiedDto()
+            {
+                QuestionId = question.QuestionId,
+                Title = question.Title,
+                Description = question.Description,
+                Answer = question.Answer,
+                AssignedQuizzes = await GetAssignedQuizzes(question.QuestionId)
+            };
+
+
+            return CreatedAtAction("GetQuestion", new { id = question.QuestionId }, questionSimplified);
         }
 
         // DELETE: api/Questions/5
