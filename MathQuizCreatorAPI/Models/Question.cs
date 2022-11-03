@@ -14,6 +14,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _answer;
 
         [BackingField(nameof(_answer))]
+        [MaxLength(500)]
         [Required]
         public string? Answer
         {

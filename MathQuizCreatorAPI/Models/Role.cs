@@ -13,6 +13,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _title;
 
         [BackingField(nameof(_title))]
+        [MaxLength(200)]
         [Required]
         public string? Title {
             get => _title;

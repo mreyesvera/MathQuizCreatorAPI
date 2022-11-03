@@ -99,6 +99,7 @@ namespace MathQuizCreatorAPI.Models
         private string _color = "#5B9BD5";
 
         [BackingField(nameof(_color))]
+        [MaxLength(200)]
         [Required]
         public string Color { 
             get

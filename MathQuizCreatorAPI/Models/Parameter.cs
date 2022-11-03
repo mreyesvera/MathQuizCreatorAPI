@@ -15,6 +15,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _name;
 
         [BackingField(nameof(_name))]
+        [MaxLength(200)]
         [Required]
         public string? Name
         {
@@ -33,6 +34,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _value;
 
         [BackingField(nameof(_value))]
+        [MaxLength(200)]
         [Required]
         public string? Value
         {

@@ -23,19 +23,6 @@ namespace MathQuizCreatorAPI.Controllers
             _context = context;
         }
 
-        private async Task<string> GetAssignedQuizzes(Guid questionId)
-        {
-            var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuestionId == questionId).ToListAsync();
-            string assignedQuizzes = "";
-
-            foreach(var quizQuestion in quizQuestions)
-            {
-                assignedQuizzes += $"{quizQuestion.Quiz.Title}\n";
-            }
-
-            return assignedQuizzes;
-        }
-
         private async Task<QuestionSimplifiedDto> GetQuestionSimplified(Guid? questionId)
         {
             var question = await _context.Questions.Where(question => question.QuestionId == questionId).FirstOrDefaultAsync();
@@ -51,7 +38,7 @@ namespace MathQuizCreatorAPI.Controllers
                 Title = question.Title,
                 Description = question.Description,
                 Answer = question.Answer,
-                AssignedQuizzes = await GetAssignedQuizzes(questionId ?? Guid.Empty)
+                AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, questionId ?? Guid.Empty)
             };
 
             return questionSimplified;
@@ -59,9 +46,25 @@ namespace MathQuizCreatorAPI.Controllers
 
         // GET: api/Quizzes
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizzes()
+        public async Task<ActionResult<IEnumerable<QuizSimplifiedDto>>> GetQuizzes()
         {
-            return await _context.Quizzes.ToListAsync();
+            var quizzes = await _context.Quizzes.ToListAsync();
+
+            var quizzesSimplified = new List<QuizSimplifiedDto>();
+
+            foreach(var quiz in quizzes)
+            {
+                quizzesSimplified.Add(new QuizSimplifiedDto()
+                {
+                    QuizId = quiz.QuizId,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    IsPublic = quiz.IsPublic,
+                    HasUnlimitedMode = quiz.HasUnlimitedMode,
+                });
+            }
+
+            return quizzesSimplified;
         }
 
         private async Task<List<QuizQuestionQuestionDeepDto>> GetQuizQuestionsQuestionDeep(Guid quizQuestionId)
@@ -75,6 +78,7 @@ namespace MathQuizCreatorAPI.Controllers
                 quizQuestionsQuestions.Add(new QuizQuestionQuestionDeepDto()
                 {
                     QuizQuestionId = quizQuestion.QuizQuestionId,
+                    QuizId = quizQuestion.QuizId,
                     QuestionId = quizQuestion.QuestionId,
                     Question = await GetQuestionSimplified(quizQuestion.QuestionId),
                     Order = quizQuestion.Order

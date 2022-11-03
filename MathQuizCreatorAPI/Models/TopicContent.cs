@@ -10,6 +10,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _title;
 
         [BackingField(nameof(_title))]
+        [MaxLength(200)]
         [Required]
         public string? Title
         {
@@ -28,6 +29,7 @@ namespace MathQuizCreatorAPI.Models
         private string? _description;
 
         [BackingField(nameof(_description))]
+        [MaxLength(500)]
         [Required]
         public string? Description
         {

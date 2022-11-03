@@ -15,13 +15,14 @@ namespace MathQuizCreatorAPI.Models
         [Required]
         public DateTimeOffset LastModifiedTime { get; set; }
 
-        [JsonProperty("LastModifiedTime")]
+        [JsonProperty("lastModifiedTime")]
         [NotMapped]
         public string LastModifiedTimeSerializable
         {
             get
             {
-                return LastModifiedTime.ToString("o");
+                //return LastModifiedTime.ToString("o");
+                return LastModifiedTime.Date.ToShortDateString();
             }
             set
             {
@@ -33,13 +34,14 @@ namespace MathQuizCreatorAPI.Models
         [Required]
         public DateTimeOffset CreationTime { get; set; }
 
-        [JsonProperty("CreationTime")]
+        [JsonProperty("creationTime")]
         [NotMapped]
         public string CreationTimeSerializable
         {
             get
             {
-                return CreationTime.ToString("o");
+                //return CreationTime.ToString("o");
+                return CreationTime.Date.ToShortDateString();
             }
             set
             {

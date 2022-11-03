@@ -23,21 +23,6 @@ namespace MathQuizCreatorAPI.Controllers
             _context = context;
         }
 
-        private async Task<string> GetAssignedQuizzes(Guid id)
-        {
-            var quizQuestions = await _context.QuizQuestions
-                .Include(quizQuestion => quizQuestion.Quiz)
-                .Where(quizQuestion => quizQuestion.QuestionId == id).ToListAsync();
-            string assignedQuizzes = "";
-
-            foreach (var quizQuestion in quizQuestions)
-            {
-                assignedQuizzes += $"{quizQuestion.Quiz.Title}\n";
-            }
-
-            return assignedQuizzes;
-        }
-
         // GET: api/Topics
         [HttpGet]
         [EnableCors("ReactApp")]
@@ -64,7 +49,7 @@ namespace MathQuizCreatorAPI.Controllers
                         Description = question.Description,
                         LastModifiedTime = question.LastModifiedTime,
                         CreationTime = question.CreationTime,
-                        AssignedQuizzes = await GetAssignedQuizzes(question.QuestionId)
+                        AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, question.QuestionId)
                     });
                 }
 
