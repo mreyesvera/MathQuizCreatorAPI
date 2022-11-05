@@ -2,7 +2,7 @@
 using MathQuizCreatorAPI.Models;
 using Newtonsoft.Json;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Question
 {
     [JsonObject]
     public class QuestionSimplifiedDto : Entity

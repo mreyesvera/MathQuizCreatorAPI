@@ -1,4 +1,5 @@
-﻿using MathQuizCreatorAPI.Models;
+﻿using MathQuizCreatorAPI.DTOs.SolvedQuiz;
+using MathQuizCreatorAPI.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace MathQuizCreatorAPI.DTOs

@@ -2,8 +2,10 @@
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
+using MathQuizCreatorAPI.DTOs.Question;
+using MathQuizCreatorAPI.DTOs.QuizQuestion;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Topic
 {
     [JsonObject]
     public class TopicDeepDto : Entity

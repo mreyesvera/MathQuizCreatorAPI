@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Question
 {
     public class QuestionEditDto
     {

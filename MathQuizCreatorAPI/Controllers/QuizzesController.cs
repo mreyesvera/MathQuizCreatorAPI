@@ -9,6 +9,10 @@ using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using System.Drawing;
 using MathQuizCreatorAPI.DTOs;
+using MathQuizCreatorAPI.DTOs.Topic;
+using MathQuizCreatorAPI.DTOs.Question;
+using MathQuizCreatorAPI.DTOs.Quiz;
+using MathQuizCreatorAPI.DTOs.QuizQuestion;
 
 namespace MathQuizCreatorAPI.Controllers
 {

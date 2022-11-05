@@ -1,8 +1,10 @@
-﻿using MathQuizCreatorAPI.Models;
+﻿using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.DTOs.Topic;
+using MathQuizCreatorAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Question
 {
     public class QuestionDeepDto : Entity
     {

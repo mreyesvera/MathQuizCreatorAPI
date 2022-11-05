@@ -1,7 +1,7 @@
 ﻿using MathQuizCreatorAPI.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Topic
 {
     public class TopicSimplifiedDto
     {

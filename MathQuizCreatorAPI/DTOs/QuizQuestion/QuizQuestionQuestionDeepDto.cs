@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using MathQuizCreatorAPI.DTOs.Question;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.QuizQuestion
 {
-    public class QuizQuestionQuestionDeepSafeDto
+    public class QuizQuestionQuestionDeepDto
     {
         [Required]
         public Guid QuizQuestionId { get; set; }
@@ -14,7 +15,7 @@ namespace MathQuizCreatorAPI.DTOs
         public Guid? QuestionId { get; set; }
 
         [Required]
-        public QuestionSimplifiedSafeDto? Question { get; set; }
+        public QuestionSimplifiedDto? Question { get; set; }
 
         [Required]
         public int Order { get; set; }

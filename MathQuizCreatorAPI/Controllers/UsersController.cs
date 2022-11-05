@@ -10,7 +10,7 @@ using MathQuizCreatorAPI.Models;
 
 namespace MathQuizCreatorAPI.Controllers
 {
-    [Route("api/[controller]")]
+    /*[Route("api/[controller]")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -104,5 +104,5 @@ namespace MathQuizCreatorAPI.Controllers
         {
             return _context.Users.Any(e => e.UserId == id);
         }
-    }
+    }*/
 }

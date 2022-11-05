@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.QuizQuestion
 {
     [JsonObject]
     public class QuizSimplifiedDto : Entity

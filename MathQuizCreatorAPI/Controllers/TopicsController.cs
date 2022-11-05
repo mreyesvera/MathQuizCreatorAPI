@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
-using MathQuizCreatorAPI.DTOs;
 using Microsoft.AspNetCore.Cors;
+using MathQuizCreatorAPI.DTOs.Question;
+using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.DTOs.Topic;
 
 namespace MathQuizCreatorAPI.Controllers
 {

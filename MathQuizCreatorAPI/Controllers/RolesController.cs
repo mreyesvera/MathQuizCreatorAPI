@@ -14,7 +14,7 @@ namespace MathQuizCreatorAPI.Controllers
     [ApiController]
     public class RolesController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        /*private readonly AppDbContext _context;
 
         public RolesController(AppDbContext context)
         {
@@ -103,6 +103,6 @@ namespace MathQuizCreatorAPI.Controllers
         private bool RoleExists(Guid id)
         {
             return _context.Roles.Any(e => e.RoleId == id);
-        }
+        }*/
     }
 }

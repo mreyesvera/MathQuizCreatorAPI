@@ -1,7 +1,9 @@
-﻿using MathQuizCreatorAPI.Models;
+﻿using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.DTOs.Topic;
+using MathQuizCreatorAPI.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.Quiz
 {
     public class QuizDeepDto : Entity
     {

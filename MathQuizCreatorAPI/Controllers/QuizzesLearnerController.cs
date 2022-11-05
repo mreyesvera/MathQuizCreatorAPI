@@ -8,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using MathQuizCreatorAPI.DTOs;
+using MathQuizCreatorAPI.DTOs.Question;
+using MathQuizCreatorAPI.DTOs.Quiz;
+using MathQuizCreatorAPI.DTOs.QuizQuestion;
 
 namespace MathQuizCreatorAPI.Controllers
 {

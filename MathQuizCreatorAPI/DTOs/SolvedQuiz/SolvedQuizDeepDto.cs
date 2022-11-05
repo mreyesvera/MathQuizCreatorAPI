@@ -1,13 +1,19 @@
-﻿using MathQuizCreatorAPI.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs
+namespace MathQuizCreatorAPI.DTOs.SolvedQuiz
 {
-    public class SolvedQuizSimplifiedDto
+    public class SolvedQuizDeepDto
     {
         [Required]
         public Guid SolvedQuizId { get; set; }
+
+        [Required]
+        public UserSimplifiedDto? User { get; set; }
+
+        [Required]
+        public QuizSimplifiedDto? Quiz { get; set; }
 
         [Required]
         public int CorrectResponses { get; set; }
