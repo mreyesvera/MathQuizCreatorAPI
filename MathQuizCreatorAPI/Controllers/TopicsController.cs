@@ -11,11 +11,13 @@ using Microsoft.AspNetCore.Cors;
 using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
 using MathQuizCreatorAPI.DTOs.Topic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MathQuizCreatorAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class TopicsController : ControllerBase
     {
         private readonly AppDbContext _context;

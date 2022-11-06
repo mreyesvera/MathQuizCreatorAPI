@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -30,11 +31,11 @@ namespace MathQuizCreatorAPI.Models
             }
         }
 
-        private User? _creator;
+        private ApplicationUser? _creator;
 
         [BackingField(nameof(_creator))]
 
-        public User? Creator
+        public ApplicationUser? Creator
         {
             get => _creator;
             set
@@ -55,11 +56,12 @@ namespace MathQuizCreatorAPI.Models
 
         }
 
-        public Question(string title, string description, string answer, Topic topic)
+        public Question(string title, string description, string answer, Topic topic, ApplicationUser creator)
         : base (title, description, topic)
         {
             QuestionId = Guid.NewGuid();
             Answer = answer;
+            Creator = creator;
         }
     }
 }

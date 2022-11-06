@@ -13,16 +13,16 @@ namespace MathQuizCreatorAPI.Authentication
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TokenService(AppDbContext context, IConfiguration config, UserManager<IdentityUser> userManager)
+        public TokenService(AppDbContext context, IConfiguration config, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _config = config;
             _userManager = userManager;
         }
 
-        public async Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(IdentityUser user)
+        public async Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
             //var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);

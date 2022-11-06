@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -14,10 +15,10 @@ namespace MathQuizCreatorAPI.Models
 
         public Guid? UserId { get; set; }
 
-        private User? _user;
+        private ApplicationUser? _user;
 
         [BackingField(nameof(_user))]
-        public User? User
+        public ApplicationUser? User
         {
             get => _user;
             set
@@ -103,12 +104,12 @@ namespace MathQuizCreatorAPI.Models
 
         }
 
-        public SolvedQuiz(User user, Quiz quiz, int correctResponses, int incorrectResponses)
+        public SolvedQuiz(ApplicationUser user, Quiz quiz, int correctResponses, int incorrectResponses)
         : base()
         {
             SolvedQuizId = Guid.NewGuid();
             User = user;
-            UserId = user.UserId;
+            UserId = user.Id;
             Quiz = quiz;
             QuizId = quiz.QuizId;
             CorrectResponses = correctResponses;

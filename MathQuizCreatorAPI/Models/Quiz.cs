@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
@@ -19,11 +20,11 @@ namespace MathQuizCreatorAPI.Models
         [Required]
         public bool HasUnlimitedMode { get; set; }
 
-        private User? _creator;
+        private ApplicationUser? _creator;
 
         [BackingField(nameof(_creator))]
 
-        public User? Creator {
+        public ApplicationUser? Creator {
             get => _creator;
             set
             {
@@ -45,7 +46,7 @@ namespace MathQuizCreatorAPI.Models
 
         }
 
-        public Quiz(string title, string description, bool isPublic, bool hasUnlimitedMode, Topic topic, User creator)
+        public Quiz(string title, string description, bool isPublic, bool hasUnlimitedMode, Topic topic, ApplicationUser creator)
         : base(title, description, topic)
         {
             QuizId = Guid.NewGuid();

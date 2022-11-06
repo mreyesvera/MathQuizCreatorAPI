@@ -11,6 +11,7 @@ using MathQuizCreatorAPI.DTOs;
 using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.Quiz;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.DTOs.Topic;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -82,7 +83,6 @@ namespace MathQuizCreatorAPI.Controllers
                 .Include(quiz => quiz.Topic)
                 .Include(quiz => quiz.QuizQuestions)
                 .Include(quiz => quiz.Creator)
-                .Include(quiz => quiz.Creator.Role)
                 .FirstOrDefaultAsync();
 
             if (quiz == null)
@@ -106,14 +106,9 @@ namespace MathQuizCreatorAPI.Controllers
                 },
                 Creator = new UserSimplifiedDto()
                 {
-                    UserId = quiz.Creator.UserId,
+                    UserId = quiz.Creator.Id,
                     Email = quiz.Creator.Email,
-                    Username = quiz.Creator.Username,
-                    Role = new RoleSimplifiedDto()
-                    {
-                        RoleId = quiz.Creator.Role.RoleId,
-                        Title = quiz.Creator.Role.Title
-                    },
+                    Username = quiz.Creator.UserName,
                 },
                 QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
 

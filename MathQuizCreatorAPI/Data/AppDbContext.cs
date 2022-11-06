@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MathQuizCreatorAPI.Data
 {
-    public class AppDbContext : IdentityDbContext<IdentityUser> /*DbContext*/
+    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid> /*DbContext*/
     {
         public AppDbContext(DbContextOptions options) : base(options)
         {

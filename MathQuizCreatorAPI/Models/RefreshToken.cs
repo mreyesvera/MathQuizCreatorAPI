@@ -6,7 +6,7 @@ namespace MathQuizCreatorAPI.Models
     public class RefreshToken
     {
         public Guid Id { get; set; }
-        public string UserId { get; set; } // Creator Id when logged in
+        public Guid UserId { get; set; } // Creator Id when logged in
         public string Token { get; set; }
         public string JwtId { get; set; }
         public bool IsUsed { get; set; } // so it is only used once.
@@ -15,6 +15,6 @@ namespace MathQuizCreatorAPI.Models
         public DateTime ExpiryDate { get; set; }
 
         [ForeignKey(nameof(UserId))]
-        public IdentityUser User { get; set; }
+        public ApplicationUser User { get; set; }
     }
 }

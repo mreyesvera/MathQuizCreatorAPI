@@ -169,7 +169,7 @@ namespace MathQuizCreatorAPI.Controllers
                 throw new ArgumentException("Creator id can't be empty.");
             }
 
-            User creator = await _context.Users.Where(creator => creator.UserId == creatorId).SingleOrDefaultAsync();
+            ApplicationUser creator = await _context.Users.Where(creator => creator.Id == creatorId).SingleOrDefaultAsync();
 
             if (creator == null)
             {

@@ -1,10 +1,11 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using MathQuizCreatorAPI.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace MathQuizCreatorAPI.Authentication
 {
     public interface ITokenService
     {
-        Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(IdentityUser user);
+        Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(ApplicationUser user);
 
         Task<AuthenticationResult> ValidateTokensAndGenerateJwtAndRefreshToken(TokenRequest tokenRequest);
     }

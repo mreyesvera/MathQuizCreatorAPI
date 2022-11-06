@@ -1,5 +1,6 @@
 using MathQuizCreatorAPI.Authentication;
 using MathQuizCreatorAPI.Data;
+using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ var connectionString = builder.Configuration.GetConnectionString("MathQuizCreato
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
@@ -115,6 +116,11 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    SeedData.CreateRoles(scope.ServiceProvider).Wait();
 }
 
 app.UseHttpsRedirection();

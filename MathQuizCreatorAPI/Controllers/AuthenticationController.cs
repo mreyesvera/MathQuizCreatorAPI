@@ -1,5 +1,6 @@
 ﻿using MathQuizCreatorAPI.Authentication;
 using MathQuizCreatorAPI.DTOs;
+using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,12 @@ namespace MathQuizCreatorAPI.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IConfiguration _config;
         private ITokenService _tokenService;
 
-        public AuthenticationController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, 
+        public AuthenticationController(UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager, 
             IConfiguration config, ITokenService tokenService)
         {
             _userManager = userManager;
@@ -95,7 +96,7 @@ namespace MathQuizCreatorAPI.Controllers
                     });
                 }
 
-                var newUser = new IdentityUser()
+                var newUser = new ApplicationUser()
                 {
                     Email = registerData.Email,
                     UserName = registerData.Username,
