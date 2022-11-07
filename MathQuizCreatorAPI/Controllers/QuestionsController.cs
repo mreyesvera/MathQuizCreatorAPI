@@ -10,11 +10,13 @@ using MathQuizCreatorAPI.Models;
 using MathQuizCreatorAPI.DTOs;
 using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.Topic;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MathQuizCreatorAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuestionsController : ControllerBase
     {
         private readonly AppDbContext _context;

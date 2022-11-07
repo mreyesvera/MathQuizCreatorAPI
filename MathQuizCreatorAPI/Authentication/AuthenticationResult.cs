@@ -1,4 +1,6 @@
-﻿namespace MathQuizCreatorAPI.Authentication
+﻿using MathQuizCreatorAPI.DTOs;
+
+namespace MathQuizCreatorAPI.Authentication
 {
     public class AuthenticationResult
     {
@@ -6,5 +8,6 @@
         public string RefreshToken { get; set; }
         public bool Success { get; set; }
         public List<string> Errors { get; set; }
+        public UserSimplifiedDto? User { get; set; }
     }
 }

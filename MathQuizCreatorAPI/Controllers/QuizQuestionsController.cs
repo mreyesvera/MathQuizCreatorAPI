@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MathQuizCreatorAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuizQuestionsController : ControllerBase
     {
         private readonly AppDbContext _context;

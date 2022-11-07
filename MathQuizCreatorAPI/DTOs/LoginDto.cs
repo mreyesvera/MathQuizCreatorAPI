@@ -5,8 +5,9 @@ namespace MathQuizCreatorAPI.DTOs
     public class LoginDto
     {
         [Required]
+        [EmailAddress]
         [MaxLength(200)]
-        public string Username { get; set; }
+        public string Email { get; set; }
 
         [Required]
         [MaxLength(200)]

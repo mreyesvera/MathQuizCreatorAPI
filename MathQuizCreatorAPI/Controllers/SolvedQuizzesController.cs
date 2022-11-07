@@ -8,11 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using MathQuizCreatorAPI.DTOs.SolvedQuiz;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MathQuizCreatorAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SolvedQuizzesController : ControllerBase
     {
         private readonly AppDbContext _context;

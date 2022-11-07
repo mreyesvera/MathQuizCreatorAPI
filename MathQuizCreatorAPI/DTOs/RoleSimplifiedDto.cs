@@ -9,6 +9,6 @@ namespace MathQuizCreatorAPI.DTOs
         public Guid RoleId { get; set; }
 
         [Required]
-        public string? Title { get; set; }
+        public string? Name { get; set; }
     }
 }

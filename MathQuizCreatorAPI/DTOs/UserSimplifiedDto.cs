@@ -14,9 +14,9 @@ namespace MathQuizCreatorAPI.DTOs
         public string? Email { get; set; }
 
         [Required]
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
 
         [Required]
-        public RoleSimplifiedDto? Role { get; set; }
+        public string? Role { get; set; }
     }
 }

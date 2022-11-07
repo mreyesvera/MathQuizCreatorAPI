@@ -13,11 +13,13 @@ using MathQuizCreatorAPI.DTOs.Topic;
 using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.Quiz;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MathQuizCreatorAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class QuizzesController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -126,7 +128,7 @@ namespace MathQuizCreatorAPI.Controllers
                 {
                     UserId = quiz.Creator.Id,
                     Email = quiz.Creator.Email,
-                    Username = quiz.Creator.UserName,
+                    UserName = quiz.Creator.UserName,
                 },
                 QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
 

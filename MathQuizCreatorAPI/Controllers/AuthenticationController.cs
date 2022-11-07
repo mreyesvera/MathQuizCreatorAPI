@@ -31,7 +31,7 @@ namespace MathQuizCreatorAPI.Controllers
         {
             try
             {
-                var existingUser = await _userManager.FindByNameAsync(loginData.Username);
+                var existingUser = await _userManager.FindByEmailAsync(loginData.Email);
                 
                 var invalidCredentialsResult = new AuthenticationResult()
                 {
@@ -57,11 +57,34 @@ namespace MathQuizCreatorAPI.Controllers
 
                 var authenticationResponse = await _tokenService.GenerateJwtTokenAndRefreshToken(existingUser);
 
+                var userRoles = await _userManager.GetRolesAsync(existingUser);
+
+                if (userRoles == null || userRoles.Count != 1)
+                {
+                    return BadRequest(new AuthenticationResult()
+                    {
+                        Errors = new List<string>()
+                        {
+                            "Invalid user."
+                        },
+                        Success = false
+                    });
+                }
+
+                var userRole = userRoles.ElementAt(0);
+
                 return Ok(new AuthenticationResult()
                 {
                     AccessToken = authenticationResponse.AccessToken,
                     RefreshToken = authenticationResponse.RefreshToken,
-                    Success = true
+                    Success = true,
+                    User = new UserSimplifiedDto()
+                    {
+                        UserId = existingUser.Id,
+                        UserName = existingUser.UserName,
+                        Email = existingUser.Email,
+                        Role = userRole,
+                    }
                 });
             }
             catch (Exception)

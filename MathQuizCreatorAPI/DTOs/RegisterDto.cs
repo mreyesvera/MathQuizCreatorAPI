@@ -17,6 +17,8 @@ namespace MathQuizCreatorAPI.DTOs
         public string Role { get; set; }
 
         [Required]
+        [MinLength(10)]
+        [DataType(DataType.Password)]
         public string Password { get; set; }
     }
 }
