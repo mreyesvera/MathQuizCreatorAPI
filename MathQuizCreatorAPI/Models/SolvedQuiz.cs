@@ -68,7 +68,7 @@ namespace MathQuizCreatorAPI.Models
 
                 _correctResponses = value;
                 TotalQuestions = IncorrectResponses + _correctResponses;
-                Score = (double) _correctResponses / TotalQuestions;
+                Score = Math.Round((double) _correctResponses / TotalQuestions, 2);
             }
         }
 
@@ -88,7 +88,7 @@ namespace MathQuizCreatorAPI.Models
 
                 _incorrectResponses = value;
                 TotalQuestions = CorrectResponses + _incorrectResponses;
-                Score = (double)CorrectResponses / TotalQuestions;
+                Score = Math.Round((double)CorrectResponses / TotalQuestions, 2);
             }
         }
 
@@ -115,7 +115,7 @@ namespace MathQuizCreatorAPI.Models
             CorrectResponses = correctResponses;
             IncorrectResponses = incorrectResponses;
             TotalQuestions = correctResponses + incorrectResponses;
-            Score = (double)correctResponses / TotalQuestions;
+            Score = Math.Round((double)correctResponses / TotalQuestions, 2);
         }
     }
 }

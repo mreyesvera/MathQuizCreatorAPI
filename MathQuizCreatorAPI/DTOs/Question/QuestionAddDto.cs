@@ -16,7 +16,7 @@ namespace MathQuizCreatorAPI.DTOs.Question
         [Required]
         public Guid TopicId { get; set; }
 
-        [Required]
-        public Guid CreatorId { get; set; }
+        //[Required]
+        //public Guid CreatorId { get; set; }
     }
 }

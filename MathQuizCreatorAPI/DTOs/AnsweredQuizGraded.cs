@@ -19,6 +19,6 @@ namespace MathQuizCreatorAPI.DTOs
         public  SolvedQuizSimplifiedDto SolvedQuiz { get; set; }
 
         [Required]
-        public List<AnsweredQuestionGraded> AnsweredQuestions { get; set; }
+        public List<AnsweredQuestionGraded> AnsweredQuestionsGraded { get; set; }
     }
 }

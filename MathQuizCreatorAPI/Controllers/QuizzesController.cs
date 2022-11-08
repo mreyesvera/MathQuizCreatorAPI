@@ -14,6 +14,7 @@ using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.Quiz;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -23,10 +24,12 @@ namespace MathQuizCreatorAPI.Controllers
     public class QuizzesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public QuizzesController(AppDbContext context)
+        public QuizzesController(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         private async Task<QuestionSimplifiedDto> GetQuestionSimplified(Guid? questionId)
@@ -186,57 +189,67 @@ namespace MathQuizCreatorAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<QuizSimplifiedDto>> PostQuiz(QuizAddDto quizAdd)
         {
-            Guid? topicId = quizAdd.TopicId;
-
-            if (topicId == null)
+            try
             {
-                throw new ArgumentException("Topic id can't be empty.");
+                Guid? topicId = quizAdd.TopicId;
+
+                if (topicId == null)
+                {
+                    throw new ArgumentException("Topic id can't be empty.");
+                }
+
+                Topic topic = await _context.Topics.Where(topic => topic.TopicId == topicId).SingleOrDefaultAsync();
+
+                if (topic == null)
+                {
+                    throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+                }
+
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                Guid creatorId;
+                //Guid? creatorId = quizAdd.CreatorId;
+
+                if (userId == null || !Guid.TryParse(userId, out creatorId))
+                {
+                    //throw new ArgumentException("Creatr id can't be empty.");
+                    throw new ArgumentException("Unidentified user.");
+                }
+
+                ApplicationUser creator = await _context.Users.Where(creator => creator.Id == creatorId).SingleOrDefaultAsync();
+
+                if (creator == null)
+                {
+                    throw new ArgumentException("Creator couldn't be found with the given Creator Id.");
+                }
+
+                var quiz = new Quiz()
+                {
+                    Title = quizAdd.Title,
+                    Description = quizAdd.Description,
+                    IsPublic = quizAdd.IsPublic,
+                    HasUnlimitedMode = quizAdd.HasUnlimitedMode,
+                    Topic = topic,
+                    Creator = creator,
+                };
+
+                _context.Quizzes.Add(quiz);
+                await _context.SaveChangesAsync();
+
+                var quizSimplified = new QuizSimplifiedDto()
+                {
+                    QuizId = quiz.QuizId,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    IsPublic = quiz.IsPublic,
+                    HasUnlimitedMode = quiz.HasUnlimitedMode,
+                };
+
+                return CreatedAtAction("GetQuiz", new { id = quiz.QuizId }, quizSimplified);
             }
-
-            Topic topic = await _context.Topics.Where(topic => topic.TopicId == topicId).SingleOrDefaultAsync();
-
-            if (topic == null)
+            catch (Exception)
             {
-                throw new ArgumentException("Topic couldn't be found with the given Topic Id.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server Error");
             }
-
-            Guid? creatorId = quizAdd.CreatorId;
-
-            if (creatorId == null)
-            {
-                throw new ArgumentException("Creatr id can't be empty.");
-            }
-
-            ApplicationUser creator = await _context.Users.Where(creator => creator.Id == creatorId).SingleOrDefaultAsync();
-
-            if (creator == null)
-            {
-                throw new ArgumentException("Creator couldn't be found with the given Creator Id.");
-            }
-
-            var quiz = new Quiz()
-            {
-                Title = quizAdd.Title,
-                Description = quizAdd.Description,
-                IsPublic = quizAdd.IsPublic,
-                HasUnlimitedMode = quizAdd.HasUnlimitedMode,
-                Topic = topic,
-                Creator = creator,
-            };
-
-            _context.Quizzes.Add(quiz);
-            await _context.SaveChangesAsync();
-
-            var quizSimplified = new QuizSimplifiedDto()
-            {
-                QuizId = quiz.QuizId,
-                Title = quiz.Title,
-                Description = quiz.Description,
-                IsPublic = quiz.IsPublic,
-                HasUnlimitedMode = quiz.HasUnlimitedMode,
-            };
-
-            return CreatedAtAction("GetQuiz", new { id = quiz.QuizId }, quizSimplified);
         }
 
         // DELETE: api/Quizzes/5
