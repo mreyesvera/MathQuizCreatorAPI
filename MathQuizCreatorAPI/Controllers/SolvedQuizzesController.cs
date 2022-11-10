@@ -9,6 +9,9 @@ using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using MathQuizCreatorAPI.DTOs.SolvedQuiz;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using System.Linq.Expressions;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -18,18 +21,61 @@ namespace MathQuizCreatorAPI.Controllers
     public class SolvedQuizzesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SolvedQuizzesController(AppDbContext context)
+        public SolvedQuizzesController(AppDbContext context, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/SolvedQuizzes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SolvedQuizSimplifiedDto>>> GetSolvedQuizzes(Guid? quizId)
         {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if(user == null)
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            if(roles == null || roles.Count != 1)
+            {
+                return BadRequest("Invalid user.");
+            }
+
+            var role = roles[0];
+
+            Expression<Func<SolvedQuiz, bool>> whereClause;
+            if(role == "Creator")
+            {
+                whereClause = (solvedQuiz) => solvedQuiz.Quiz.Creator.Id == guidUserId;
+            } else if (role == "Learner")
+            {
+                whereClause = (solvedQuiz) => solvedQuiz.UserId == guidUserId;
+            } else
+            {
+                return BadRequest("Invalid user role.");
+            }
+
             var solvedQuizzes = await _context.SolvedQuizzes
+                .Include(solvedQuiz => solvedQuiz.Quiz)
+                .ThenInclude(quiz => quiz.Creator)
                 .Where(solvedQuiz => (quizId == null || solvedQuiz.QuizId == quizId))
+                .Where(whereClause)
                 .ToListAsync();
 
             var solvedQuizzesSimplified = new List<SolvedQuizSimplifiedDto>();

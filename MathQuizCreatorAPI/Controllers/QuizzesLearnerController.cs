@@ -84,6 +84,14 @@ namespace MathQuizCreatorAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<QuizDeepSafeDto>> GetQuiz(Guid id)
         {
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
             var quiz = await _context.Quizzes
                 .Where(quiz => quiz.QuizId == id)
                 .Include(quiz => quiz.Topic)
@@ -94,6 +102,11 @@ namespace MathQuizCreatorAPI.Controllers
             if (quiz == null)
             {
                 return NotFound();
+            }
+
+            if(quiz.Creator.Id != guidUserId && !quiz.IsPublic)
+            {
+                return BadRequest("Quiz not accessible.");
             }
 
             var quizDeep = new QuizDeepSafeDto()

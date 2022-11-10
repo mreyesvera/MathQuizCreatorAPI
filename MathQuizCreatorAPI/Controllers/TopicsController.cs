@@ -12,6 +12,8 @@ using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
 using MathQuizCreatorAPI.DTOs.Topic;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
 
 namespace MathQuizCreatorAPI.Controllers
 {
@@ -21,23 +23,39 @@ namespace MathQuizCreatorAPI.Controllers
     public class TopicsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public TopicsController(AppDbContext context)
+        public TopicsController(AppDbContext context, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
         {
+            _userManager = userManager;
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         // GET: api/Topics
         [HttpGet]
         [EnableCors("ReactApp")]
-        public async Task<ActionResult<IEnumerable<TopicDeepDto>>> GetTopics()
+        public async Task<ActionResult<IEnumerable<TopicDeepDto>>> GetTopics(bool owner = false)
         {
             // TO DO: Later filter this by the user that is sending the request
             // also will need to check that they have the appropriate role?
             // maybe not, because if they are not a creator they won't have any quizzes
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+
             var topics = await _context.Topics
                 .Include(topic => topic.Questions)
+                .ThenInclude(question => question.Creator)
                 .Include(topic => topic.Quizzes).ToListAsync();
+
 
             var topicsDto = new List<TopicDeepDto>();
 
@@ -46,30 +64,40 @@ namespace MathQuizCreatorAPI.Controllers
                 var questionsDto = new List<QuestionSimplifiedDto>();
                 foreach(var question in topic.Questions)
                 {
-                    questionsDto.Add(new QuestionSimplifiedDto()
+                    if (question.Creator.Id == guidUserId)
                     {
-                        QuestionId = question.QuestionId,
-                        Title = question.Title,
-                        Description = question.Description,
-                        LastModifiedTime = question.LastModifiedTime,
-                        CreationTime = question.CreationTime,
-                        AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, question.QuestionId)
-                    });
+                        questionsDto.Add(new QuestionSimplifiedDto()
+                        {
+                            QuestionId = question.QuestionId,
+                            Title = question.Title,
+                            Description = question.Description,
+                            LastModifiedTime = question.LastModifiedTime,
+                            CreationTime = question.CreationTime,
+                            AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, question.QuestionId)
+                        });
+                    }
                 }
 
                 var quizzesDto = new List<QuizSimplifiedDto>();
                 foreach(var quiz in topic.Quizzes)
                 {
-                    quizzesDto.Add(new QuizSimplifiedDto()
+                    if(
+                        (owner == true && quiz.Creator.Id == guidUserId) ||
+                        (owner == false && (quiz.Creator.Id == guidUserId || quiz.IsPublic))
+                        )
+                    //if (quiz.Creator.Id == guidUserId || quiz.IsPublic)
                     {
-                        QuizId = quiz.QuizId,
-                        Title = quiz.Title,
-                        Description = quiz.Description,
-                        IsPublic = quiz.IsPublic,
-                        HasUnlimitedMode = quiz.HasUnlimitedMode,
-                        LastModifiedTime = quiz.LastModifiedTime,
-                        CreationTime = quiz.CreationTime
-                    });
+                        quizzesDto.Add(new QuizSimplifiedDto()
+                        {
+                            QuizId = quiz.QuizId,
+                            Title = quiz.Title,
+                            Description = quiz.Description,
+                            IsPublic = quiz.IsPublic,
+                            HasUnlimitedMode = quiz.HasUnlimitedMode,
+                            LastModifiedTime = quiz.LastModifiedTime,
+                            CreationTime = quiz.CreationTime
+                        });
+                    }
                 }
                 var topicDto = new TopicDeepDto()
                 {

@@ -144,6 +144,7 @@ namespace MathQuizCreatorAPI.Controllers
         // PUT: api/Quizzes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Creator")]
         public async Task<IActionResult> PutQuiz(Guid id, QuizEditDto quizEdit)
         {
             if (id != quizEdit.QuizId)
@@ -151,11 +152,27 @@ namespace MathQuizCreatorAPI.Controllers
                 return BadRequest();
             }
 
-            var quiz = await _context.Quizzes.Where(quiz => quiz.QuizId == id).FirstOrDefaultAsync();
+            var quiz = await _context.Quizzes
+                .Where(quiz => quiz.QuizId == id)
+                .Include(quiz => quiz.Creator)
+                .FirstOrDefaultAsync();
 
             if (quiz == null)
             {
                 return NotFound();
+            }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            if (quiz.Creator.Id != guidUserId)
+            {
+                return Unauthorized();
             }
 
             quiz.Title = quizEdit.Title;
@@ -187,6 +204,7 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Quizzes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Creator")]
         public async Task<ActionResult<QuizSimplifiedDto>> PostQuiz(QuizAddDto quizAdd)
         {
             try
@@ -254,12 +272,26 @@ namespace MathQuizCreatorAPI.Controllers
 
         // DELETE: api/Quizzes/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Creator")]
         public async Task<IActionResult> DeleteQuiz(Guid id)
         {
             var quiz = await _context.Quizzes.FindAsync(id);
             if (quiz == null)
             {
                 return NotFound();
+            }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            if (quiz.Creator.Id != guidUserId)
+            {
+                return Unauthorized();
             }
 
             _context.Quizzes.Remove(quiz);

@@ -108,19 +108,39 @@ namespace MathQuizCreatorAPI.Controllers
         // PUT: api/Questions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Roles = "Creator")]
         public async Task<IActionResult> PutQuestion(Guid id, QuestionEditDto questionEdit)
         {
+
             if (id != questionEdit.QuestionId)
             {
                 return BadRequest();
             }
 
-            var question = await _context.Questions.Where(question => question.QuestionId == id).FirstOrDefaultAsync();
+            var question = await _context.Questions
+                .Where(question => question.QuestionId == id)
+                .Include(question => question.Creator)
+                .FirstOrDefaultAsync();
 
             if (question == null)
             {
                 return NotFound();
             }
+
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            if(question.Creator.Id != guidUserId)
+            {
+                return Unauthorized();
+            }
+
 
             question.Title = questionEdit.Title;
             question.Description = questionEdit.Description;
@@ -150,6 +170,7 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Questions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "Creator")]
         public async Task<ActionResult<QuestionSimplifiedDto>> PostQuestion(QuestionAddDto questionAdd)
         {
             try
@@ -217,6 +238,7 @@ namespace MathQuizCreatorAPI.Controllers
 
         // DELETE: api/Questions/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Creator")]
         public async Task<IActionResult> DeleteQuestion(Guid id)
         {
             var question = await _context.Questions.FindAsync(id);
@@ -224,6 +246,20 @@ namespace MathQuizCreatorAPI.Controllers
             {
                 return NotFound();
             }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            if (question.Creator.Id != guidUserId)
+            {
+                return Unauthorized();
+            }
+
 
             _context.Questions.Remove(question);
             await _context.SaveChangesAsync();
