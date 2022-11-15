@@ -1,4 +1,6 @@
-﻿using MathQuizCreatorAPI.Data;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -35,10 +37,26 @@ namespace MathQuizCreatorAPI.Authentication
             _userManager = userManager;
         }
 
+        private string getSecretKey()
+        {
+            var uri = _config.GetSection("AzureAd:Uri").Value;
+            var tenantId = _config.GetSection("AzureAd:TenantId").Value;
+            var clientId = _config.GetSection("AzureAd:ClientId").Value;
+            var secret = _config.GetSection("AzureAd:Secret").Value;
+
+            ClientSecretCredential credential = new ClientSecretCredential(tenantId, clientId, secret);
+            SecretClient client = new SecretClient(new Uri(uri), credential);
+
+            var secretKey = client.GetSecret("JWTSecretKey").Value.Value;
+
+            return secretKey;
+        }
+
         public async Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
+            //var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
+            var secretKey = Encoding.UTF8.GetBytes(getSecretKey());
             var issuer = _config.GetSection("JWT:Issuer").Value;
             var audience = _config.GetSection("JWT:Audience").Value;
 
@@ -102,7 +120,8 @@ namespace MathQuizCreatorAPI.Authentication
 
         public async Task<AuthenticationResult> ValidateTokensAndGenerateJwtAndRefreshToken(TokenRequest tokenRequest)
         {
-            var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
+            //var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
+            var secretKey = Encoding.UTF8.GetBytes(getSecretKey());
             var issuer = _config.GetSection("JWT:Issuer").Value;
             var audience = _config.GetSection("JWT:Audience").Value;
 

@@ -48,13 +48,11 @@ namespace MathQuizCreatorAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        // GET: api/QuizzesLearner
-        /*[HttpGet]
-        public async Task<ActionResult<IEnumerable<Quiz>>> GetQuizzes()
-        {
-            return await _context.Quizzes.ToListAsync();
-        }*/
-
+        /// <summary>
+        /// Returns the question with the matching question id.
+        /// </summary>
+        /// <param name="questionId">question id of question to look for</param>
+        /// <returns>found question simplified</returns>
         private async Task<QuestionSimplifiedSafeDto> GetQuestionSimplified(Guid? questionId)
         {
             var question = await _context.Questions.Where(question => question.QuestionId == questionId).FirstOrDefaultAsync();
@@ -75,6 +73,11 @@ namespace MathQuizCreatorAPI.Controllers
             return questionSimplified;
         }
 
+        /// <summary>
+        /// Returns the found quiz questions for a provided quizId.
+        /// </summary>
+        /// <param name="quizId">Quiz id to filter quiz questions for</param>
+        /// <returns>List of quiz questions with the detailed quesiton</returns>
         private async Task<List<QuizQuestionQuestionDeepSafeDto>> GetQuizQuestionsQuestionDeep(Guid quizQuestionId)
         {
             var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuizId == quizQuestionId).ToListAsync();
@@ -96,63 +99,81 @@ namespace MathQuizCreatorAPI.Controllers
             return quizQuestionsQuestions;
         }
 
+        /// <summary>
+        /// Returns a quiz matching the provided id.
+        /// </summary>
+        /// <param name="id">quiz id of quiz to look for</param>
+        /// <returns>Found quiz</returns>
         // GET: api/QuizzesLearner/5
         [HttpGet("{id}")]
         public async Task<ActionResult<QuizDeepSafeDto>> GetQuiz(Guid id)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Guid guidUserId;
-
-            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            try
             {
-                return BadRequest("Unidentified user.");
-            }
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                Guid guidUserId;
 
-            var quiz = await _context.Quizzes
-                .Where(quiz => quiz.QuizId == id)
-                .Include(quiz => quiz.Topic)
-                .Include(quiz => quiz.QuizQuestions)
-                .Include(quiz => quiz.Creator)
-                .FirstOrDefaultAsync();
-
-            if (quiz == null)
-            {
-                return NotFound();
-            }
-
-            if (quiz.Creator.Id != guidUserId && !quiz.IsPublic)
-            {
-                return BadRequest("Quiz not accessible.");
-            }
-
-            var quizDeep = new QuizDeepSafeDto()
-            {
-                QuizId = quiz.QuizId,
-                Title = quiz.Title,
-                Description = quiz.Description,
-                IsPublic = quiz.IsPublic,
-                HasUnlimitedMode = quiz.HasUnlimitedMode,
-                LastModifiedTime = quiz.LastModifiedTime,
-                CreationTime = quiz.CreationTime,
-                Topic = new TopicSimplifiedDto()
+                if (userId == null || !Guid.TryParse(userId, out guidUserId))
                 {
-                    TopicId = quiz.Topic.TopicId,
-                    Title = quiz.Topic.Title
-                },
-                Creator = new UserSimplifiedDto()
+                    return BadRequest("Unidentified user.");
+                }
+
+                var quiz = await _context.Quizzes
+                    .Where(quiz => quiz.QuizId == id)
+                    .Include(quiz => quiz.Topic)
+                    .Include(quiz => quiz.QuizQuestions)
+                    .Include(quiz => quiz.Creator)
+                    .FirstOrDefaultAsync();
+
+                if (quiz == null)
                 {
-                    UserId = quiz.Creator.Id,
-                    Email = quiz.Creator.Email,
-                    UserName = quiz.Creator.UserName,
-                },
-                QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
+                    return NotFound();
+                }
 
-            };
+                if (quiz.Creator.Id != guidUserId && !quiz.IsPublic)
+                {
+                    return BadRequest("Quiz not accessible.");
+                }
+
+                var quizDeep = new QuizDeepSafeDto()
+                {
+                    QuizId = quiz.QuizId,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    IsPublic = quiz.IsPublic,
+                    HasUnlimitedMode = quiz.HasUnlimitedMode,
+                    LastModifiedTime = quiz.LastModifiedTime,
+                    CreationTime = quiz.CreationTime,
+                    Topic = new TopicSimplifiedDto()
+                    {
+                        TopicId = quiz.Topic.TopicId,
+                        Title = quiz.Topic.Title
+                    },
+                    Creator = new UserSimplifiedDto()
+                    {
+                        UserId = quiz.Creator.Id,
+                        Email = quiz.Creator.Email,
+                        UserName = quiz.Creator.UserName,
+                    },
+                    QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
+
+                };
 
 
-            return quizDeep;
+                return quizDeep;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server Error");
+            }
         }
 
+        /// <summary>
+        /// Returned the answer once parameters have been substituted. 
+        /// </summary>
+        /// <param name="correctAnswer">correct answer</param>
+        /// <param name="parameters">available parameters for question</param>
+        /// <returns>correct answer adapted to parameters</returns>
         // Adapt to parametrization
         private static string GetParametrizedAnswer(string correctAnswer, List<Parameter> parameters)
         {
@@ -164,7 +185,12 @@ namespace MathQuizCreatorAPI.Controllers
             return correctAnswer;
         }
 
-
+        /// <summary>
+        /// Grades a provided answered question using the provided question.
+        /// </summary>
+        /// <param name="answeredQuestion">user answered question</param>
+        /// <param name="question">saved question</param>
+        /// <returns>graded answered question</returns>
         // Will need to adapt to parametrization
         private async Task<AnsweredQuestionGraded> GradeQuestion(AnsweredQuestion answeredQuestion, Question question)
         {
@@ -183,18 +209,23 @@ namespace MathQuizCreatorAPI.Controllers
             };
         }
 
+        /// <summary>
+        /// Posts an answered quiz. 
+        /// It verifies the passed in quiz, and creates a solved quiz.
+        /// It grades it and returns the graded quiz as well as the solved quiz.
+        /// </summary>
+        /// <param name="answeredQuiz">user answered quiz</param>
+        /// <returns>answered quiz graded (with solved quiz)</returns>
         [HttpPost]
         public async Task<ActionResult<AnsweredQuizGraded>> PostQuiz(AnsweredQuiz answeredQuiz)
         {
             try
             {
-
                 var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
                 Guid guidUserId;
 
                 if (userId == null || !Guid.TryParse(userId, out guidUserId))
                 {
-                    //throw new ArgumentException("Unidentified user.");
                     return BadRequest("Unidentified user.");
                 }
 
@@ -203,7 +234,6 @@ namespace MathQuizCreatorAPI.Controllers
                 // when trying to solve a quiz there should be answers to the questions, can't grade empty quiz
                 if (answeredQuestions == null || answeredQuestions.Count == 0)
                 {
-                    //throw new ArgumentException("Can't have empty answered questions.");
                     return BadRequest("Can't have empty answered questions.");
                 }
 
@@ -214,13 +244,11 @@ namespace MathQuizCreatorAPI.Controllers
 
                 if (quizQuestions == null || quizQuestions.Count == 0)
                 {
-                    //throw new ArgumentException("Can't grade quiz without questions.");
                     return BadRequest("Can't grade quiz without questions.");
                 }
 
                 if (quizQuestions.Count != answeredQuiz.AnsweredQuestions.Count)
                 {
-                    //throw new ArgumentException("Mismatch of quiz's questions and sent answered questions.");
                     return BadRequest("Mismatch of quiz's questions and sent answered questions.");
                 }
 
@@ -236,7 +264,6 @@ namespace MathQuizCreatorAPI.Controllers
 
                     if (question == null)
                     {
-                        //throw new ArgumentException("Question was not found.");
                         return BadRequest("Question was not found.");
                     }
 
@@ -244,7 +271,6 @@ namespace MathQuizCreatorAPI.Controllers
 
                     if (foundAnsweredQuestions == null || foundAnsweredQuestions.Count != 1)
                     {
-                        //throw new ArgumentException("Mismatch of quiz's questions and sent answered questions.");
                         return BadRequest("Mismatch of quiz's questions and sent answered questions.");
                     }
 
@@ -303,18 +329,23 @@ namespace MathQuizCreatorAPI.Controllers
             }
         }
 
-
+        /// <summary>
+        /// Grades a question. 
+        /// Used for preview and unlimited mode,
+        /// nothing is saved in the database. 
+        /// 
+        /// If for preview, only the owner can view it. 
+        /// If unlimited mode, only if unlimited mode is enabled it works.
+        /// </summary>
+        /// <param name="quizId">quiz id that the question belongs to</param>
+        /// <param name="answeredQuestion">user answered question</param>
+        /// <returns>graded answered question</returns>
         [HttpPost]
         [Route("GradeQuestion")]
         public async Task<ActionResult<AnsweredQuestionGraded>> GradeQuestion(Guid? quizId, [FromBody] AnsweredQuestion answeredQuestion)
         {
             try
             {
-                //if(answeredQuestion == null)
-                //{
-                //    return BadRequest("Invalid answered Question");
-                //}
-
                 var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
                 Guid guidUserId;
 

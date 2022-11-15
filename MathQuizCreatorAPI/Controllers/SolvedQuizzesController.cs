@@ -41,74 +41,91 @@ namespace MathQuizCreatorAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Returns a list of solved quizzes, all or only for the provided quiz id.
+        /// If a creator is getting them, it gets only solved quizzes of quizzes they have created.
+        /// If a learner is getting them, it only returns solved quizzes they have solved.
+        /// </summary>
+        /// <param name="quizId">Optional quiz id to return only solved quizzes for that quiz</param>
+        /// <returns>list of solved quizzes</returns>
         // GET: api/SolvedQuizzes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<SolvedQuizSimplifiedDto>>> GetSolvedQuizzes(Guid? quizId)
         {
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            Guid guidUserId;
-
-            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            try
             {
-                return BadRequest("Unidentified user.");
-            }
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                Guid guidUserId;
 
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if(user == null)
-            {
-                return BadRequest("Unidentified user.");
-            }
-
-            var roles = await _userManager.GetRolesAsync(user);
-
-            if(roles == null || roles.Count != 1)
-            {
-                return BadRequest("Invalid user.");
-            }
-
-            var role = roles[0];
-
-            Expression<Func<SolvedQuiz, bool>> whereClause;
-            if(role == "Creator")
-            {
-                whereClause = (solvedQuiz) => solvedQuiz.Quiz.Creator.Id == guidUserId;
-            } else if (role == "Learner")
-            {
-                whereClause = (solvedQuiz) => solvedQuiz.UserId == guidUserId;
-            } else
-            {
-                return BadRequest("Invalid user role.");
-            }
-
-            var solvedQuizzes = await _context.SolvedQuizzes
-                .Include(solvedQuiz => solvedQuiz.Quiz)
-                .ThenInclude(quiz => quiz.Creator)
-                .Where(solvedQuiz => (quizId == null || solvedQuiz.QuizId == quizId))
-                .Where(whereClause)
-                .ToListAsync();
-
-            var solvedQuizzesSimplified = new List<SolvedQuizSimplifiedDto>();
-
-            foreach(var solvedQuiz in solvedQuizzes)
-            {
-                solvedQuizzesSimplified.Add(new SolvedQuizSimplifiedDto()
+                if (userId == null || !Guid.TryParse(userId, out guidUserId))
                 {
-                    SolvedQuizId = solvedQuiz.SolvedQuizId,
-                    CorrectResponses = solvedQuiz.CorrectResponses,
-                    IncorrectResponses = solvedQuiz.IncorrectResponses,
-                    TotalQuestions = solvedQuiz.TotalQuestions,
-                    Score = solvedQuiz.Score,
-                    CreationTime = solvedQuiz.CreationTime,
-                    LastModifiedTime = solvedQuiz.LastModifiedTime,
-                });
-            }   
+                    return BadRequest("Unidentified user.");
+                }
 
-            return solvedQuizzesSimplified;
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return BadRequest("Unidentified user.");
+                }
+
+                var roles = await _userManager.GetRolesAsync(user);
+
+                if (roles == null || roles.Count != 1)
+                {
+                    return BadRequest("Invalid user.");
+                }
+
+                var role = roles[0];
+
+                Expression<Func<SolvedQuiz, bool>> whereClause;
+                if (role == "Creator")
+                {
+                    whereClause = (solvedQuiz) => solvedQuiz.Quiz.Creator.Id == guidUserId;
+                }
+                else if (role == "Learner")
+                {
+                    whereClause = (solvedQuiz) => solvedQuiz.UserId == guidUserId;
+                }
+                else
+                {
+                    return BadRequest("Invalid user role.");
+                }
+
+                var solvedQuizzes = await _context.SolvedQuizzes
+                    .Include(solvedQuiz => solvedQuiz.Quiz)
+                    .ThenInclude(quiz => quiz.Creator)
+                    .Where(solvedQuiz => (quizId == null || solvedQuiz.QuizId == quizId))
+                    .Where(whereClause)
+                    .ToListAsync();
+
+                var solvedQuizzesSimplified = new List<SolvedQuizSimplifiedDto>();
+
+                foreach (var solvedQuiz in solvedQuizzes)
+                {
+                    solvedQuizzesSimplified.Add(new SolvedQuizSimplifiedDto()
+                    {
+                        SolvedQuizId = solvedQuiz.SolvedQuizId,
+                        CorrectResponses = solvedQuiz.CorrectResponses,
+                        IncorrectResponses = solvedQuiz.IncorrectResponses,
+                        TotalQuestions = solvedQuiz.TotalQuestions,
+                        Score = solvedQuiz.Score,
+                        CreationTime = solvedQuiz.CreationTime,
+                        LastModifiedTime = solvedQuiz.LastModifiedTime,
+                    });
+                }
+
+                return solvedQuizzesSimplified;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server Error");
+            }
         }
 
+        // Not needed currently
         // GET: api/SolvedQuizzes/5
-        [HttpGet("{id}")]
+        /*[HttpGet("{id}")]
         public async Task<ActionResult<SolvedQuiz>> GetSolvedQuiz(Guid id)
         {
             var solvedQuiz = await _context.SolvedQuizzes.FindAsync(id);
@@ -119,11 +136,12 @@ namespace MathQuizCreatorAPI.Controllers
             }
 
             return solvedQuiz;
-        }
+        }*/
 
+        // Not needed currently
         // PUT: api/SolvedQuizzes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        /*[HttpPut("{id}")]
         public async Task<IActionResult> PutSolvedQuiz(Guid id, SolvedQuiz solvedQuiz)
         {
             if (id != solvedQuiz.SolvedQuizId)
@@ -150,21 +168,23 @@ namespace MathQuizCreatorAPI.Controllers
             }
 
             return NoContent();
-        }
+        }*/
 
+        // Not needed currently
         // POST: api/SolvedQuizzes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        /*[HttpPost]
         public async Task<ActionResult<SolvedQuiz>> PostSolvedQuiz(SolvedQuiz solvedQuiz)
         {
             _context.SolvedQuizzes.Add(solvedQuiz);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetSolvedQuiz", new { id = solvedQuiz.SolvedQuizId }, solvedQuiz);
-        }
+        }*/
 
+        // Not needed currently
         // DELETE: api/SolvedQuizzes/5
-        [HttpDelete("{id}")]
+        /*[HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSolvedQuiz(Guid id)
         {
             var solvedQuiz = await _context.SolvedQuizzes.FindAsync(id);
@@ -177,11 +197,12 @@ namespace MathQuizCreatorAPI.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
+        }*/
 
-        private bool SolvedQuizExists(Guid id)
+        // Not needed currently
+        /*private bool SolvedQuizExists(Guid id)
         {
             return _context.SolvedQuizzes.Any(e => e.SolvedQuizId == id);
-        }
+        }*/
     }
 }

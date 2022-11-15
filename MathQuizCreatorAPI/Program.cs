@@ -1,3 +1,5 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using MathQuizCreatorAPI.Authentication;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
@@ -12,8 +14,19 @@ var MyAllowSpecificOrigins = "ReactApp";
 
 var builder = WebApplication.CreateBuilder(args);
 
+var uri = builder.Configuration["AzureAd:Uri"];
+var tenantId = builder.Configuration["AzureAd:TenantId"];
+var clientId = builder.Configuration["AzureAd:ClientId"];
+var secret = builder.Configuration["AzureAd:Secret"];
+
+ClientSecretCredential credential = new ClientSecretCredential(tenantId, clientId, secret);
+SecretClient client = new SecretClient(new Uri(uri), credential);
+
+var connectionString = client.GetSecret("MathQuizCreatorDB").Value.Value;
+var secretKey = client.GetSecret("JWTSecretKey").Value.Value;
+
 // Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("MathQuizCreatorDB");
+//var connectionString = builder.Configuration.GetConnectionString("MathQuizCreatorDB");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -30,6 +43,7 @@ builder.Services.AddCors(options =>
         c =>
         {
             c.WithOrigins("http://localhost:3000")
+            //c.WithOrigins("https://mathquizcreatorfe.azurewebsites.net")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
                 //.AllowCredentials();
@@ -40,7 +54,8 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 builder.Services.Configure<JWTConfig>(builder.Configuration.GetSection("JWT"));
-var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWT:SecretKey").Value);
+//var key = Encoding.ASCII.GetBytes(builder.Configuration.GetSection("JWT:SecretKey").Value);
+var key = Encoding.ASCII.GetBytes(secretKey);
 
 var tokenValidationParams = new TokenValidationParameters
 {
