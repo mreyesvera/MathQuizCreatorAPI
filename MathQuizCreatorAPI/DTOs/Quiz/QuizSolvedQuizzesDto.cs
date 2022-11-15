@@ -1,8 +1,7 @@
-﻿using MathQuizCreatorAPI.Models;
-using Newtonsoft.Json;
+﻿using MathQuizCreatorAPI.DTOs.SolvedQuiz;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs.Question
+namespace MathQuizCreatorAPI.DTOs.Quiz
 {
     /// <summary>
     /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
@@ -10,14 +9,19 @@ namespace MathQuizCreatorAPI.DTOs.Question
     /// has been used without due acknowledgement and I have not made my work
     /// available to anyone else.
     /// 
-    /// Question Simplfied Safe Dto. Same as QuestionSimplifiedDto, 
-    /// but without the question's answer. 
+    /// Quiz Solved Quizzes Dto. Used to send quiz data along with
+    /// its associated solved quizzes.
     /// </summary>
-    [JsonObject]
-    public class QuestionSimplifiedSafeDto : Entity
+    public class QuizSolvedQuizzesDto
     {
         [Required]
-        public Guid QuestionId { get; set; }
+        public Guid QuizId { get; set; }
+
+        [Required]
+        public bool IsPublic { get; set; }
+
+        [Required]
+        public bool HasUnlimitedMode { get; set; }
 
         [Required]
         public string Title { get; set; }
@@ -25,6 +29,7 @@ namespace MathQuizCreatorAPI.DTOs.Question
         [Required]
         public string Description { get; set; }
 
-        public List<string> AssignedQuizzes { get; set; }
+        [Required]
+        public List<SolvedQuizSimplifiedDto> SolvedQuizzes { get; set; }
     }
 }

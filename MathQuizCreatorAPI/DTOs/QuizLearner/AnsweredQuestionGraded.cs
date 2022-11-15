@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs.Question
+namespace MathQuizCreatorAPI.DTOs.QuizLearner
 {
     /// <summary>
     /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
@@ -8,20 +8,21 @@ namespace MathQuizCreatorAPI.DTOs.Question
     /// has been used without due acknowledgement and I have not made my work
     /// available to anyone else.
     /// 
-    /// Question Add Dto. Used when receiving question data to add.
+    /// Answered Question Graded Dto. 
+    /// Used when sending a graded answered question.
     /// </summary>
-    public class QuestionAddDto
+    public class AnsweredQuestionGraded
     {
         [Required]
-        public string? Title { get; set; }
+        public Guid QuestionId { get; set; }
 
         [Required]
-        public string? Description { get; set; }
+        public string Answer { get; set; }
 
         [Required]
-        public string? Answer { get; set; }
+        public bool Correct { get; set; }
 
         [Required]
-        public Guid TopicId { get; set; }
+        public string CorrectAnswer { get; set; }
     }
 }

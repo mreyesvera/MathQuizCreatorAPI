@@ -12,9 +12,18 @@ using MathQuizCreatorAPI.DTOs.Question;
 using MathQuizCreatorAPI.DTOs.Topic;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using MathQuizCreatorAPI.DTOs.Parameter;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions for Questions.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -29,6 +38,13 @@ namespace MathQuizCreatorAPI.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Gets the assigned quizzes for a specific question in the provided context.  
+        /// </summary>
+        /// <param name="_context">Context used to get the assigned quizzes from</param>
+        /// <param name="questionId">Question id to retrieve the assigned quizzes from</param>
+        /// <returns>list of strings with the assigned quizzes' titles</returns>
+        //[Authorize]
         public static async Task<List<string>> GetAssignedQuizzes(AppDbContext _context, Guid questionId)
         {
             var quizQuestions = await _context.QuizQuestions
@@ -45,6 +61,11 @@ namespace MathQuizCreatorAPI.Controllers
             return assignedQuizzes;
         }
 
+        /// <summary>
+        /// Returns a list of questions. If the topic id is provided,
+        /// </summary>
+        /// <param name="topicId"></param>
+        /// <returns></returns>
         // GET: api/Questions
         [HttpGet]
         public async Task<ActionResult<IEnumerable<QuestionSimplifiedDto>>> GetQuestions(Guid? topicId = null)
@@ -77,15 +98,52 @@ namespace MathQuizCreatorAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<QuestionDeepDto>> GetQuestion(Guid id)
         {
+            if (_httpContextAccessor.HttpContext == null
+                || _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
             var question = await _context.Questions
-                .Where(question => question.QuestionId == id)
                 .Include(question => question.Topic)
+                .Include(question => question.Creator)
+                .Where(question => question.QuestionId == id)
+                .Where(question => question.Creator.Id == guidUserId)
                 .FirstOrDefaultAsync();
 
             if (question == null)
             {
                 return NotFound();
             }
+
+            var parameters = await _context.Parameters
+                                .Include(param => param.Question)
+                                .ThenInclude(question => question.Creator)
+                                .Where(param => param.QuestionId == id)
+                                .Where(param => param.Question.Creator.Id == guidUserId)
+                                .ToListAsync();
+
+            var parametersSimplified = new List<ParameterSimplifiedDto>();
+
+            parameters.ForEach(param =>
+            {
+                parametersSimplified.Add(new ParameterSimplifiedDto()
+                {
+                    ParameterId = param.ParameterId,
+                    Name = param.Name,
+                    Value = param.Value,
+                    Order = param.Order,
+                    QuestionId = param.QuestionId
+                });
+            });
 
             var questionDeep = new QuestionDeepDto()
             {
@@ -99,7 +157,8 @@ namespace MathQuizCreatorAPI.Controllers
                     Title = question.Topic.Title
                 },
                 LastModifiedTime = question.LastModifiedTime,
-                CreationTime = question.CreationTime
+                CreationTime = question.CreationTime,
+                Parameters = parametersSimplified
             };
 
             return questionDeep;

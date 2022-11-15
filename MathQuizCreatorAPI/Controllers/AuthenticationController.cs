@@ -1,5 +1,6 @@
 ﻿using MathQuizCreatorAPI.Authentication;
 using MathQuizCreatorAPI.DTOs;
+using MathQuizCreatorAPI.DTOs.Authentication;
 using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -7,6 +8,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions that are available for users related
+    /// to authentication. They are all unauthorized, since they are used
+    /// by unauthorized users for authorization. The actions include logging in,
+    /// registering and refreshing their token. 
+    /// 
+    /// The way this controller is created and used is based on learning resources 
+    /// and experience from my previous co-op at Medic.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class AuthenticationController : ControllerBase
@@ -25,6 +40,11 @@ namespace MathQuizCreatorAPI.Controllers
             _tokenService = tokenService;
         }
 
+        /// <summary>
+        /// Logs in a user based on login in data if they are valid.
+        /// </summary>
+        /// <param name="loginData">User login data</param>
+        /// <returns>Action Result based on login result</returns>
         [HttpPost]
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDto loginData)
@@ -93,6 +113,11 @@ namespace MathQuizCreatorAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Registers a user based on passed in register data.
+        /// </summary>
+        /// <param name="registerData">User registering data used to register the user</param>
+        /// <returns>action result based on outcome of register</returns>
         [HttpPost]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerData)
         {
@@ -163,6 +188,11 @@ namespace MathQuizCreatorAPI.Controllers
             }
         }
 
+        /// <summary>
+        /// Validates and regenerates the tokens based on the refresh token. 
+        /// </summary>
+        /// <param name="tokenRequest">Access and refresh tokens</param>
+        /// <returns>action result from the result of the token validation/generation</returns>
         [HttpPost("RefreshToken")]
         public async Task<IActionResult> RefreshToken([FromBody] TokenRequest tokenRequest)
         {

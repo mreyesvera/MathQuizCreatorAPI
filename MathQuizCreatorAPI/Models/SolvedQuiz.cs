@@ -5,13 +5,22 @@ using Newtonsoft.Json;
 
 namespace MathQuizCreatorAPI.Models
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This model represents a Solved Quiz. It holds the user id of the
+    /// user that solved the quiz, the quiz id, as well as the number
+    /// of correct and incorrect responses, total number of questions and
+    /// the score. 
+    /// </summary>
     [JsonObject]
     public class SolvedQuiz : Entity
     {
         [Key]
         public Guid SolvedQuizId { get; set; }
-
-
 
         public Guid? UserId { get; set; }
 

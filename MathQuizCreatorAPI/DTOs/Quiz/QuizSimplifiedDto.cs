@@ -3,8 +3,18 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 
-namespace MathQuizCreatorAPI.DTOs.QuizQuestion
+namespace MathQuizCreatorAPI.DTOs.Quiz
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// Quiz Simplfied Dto. Used when sending data without
+    /// the need for the values of relationships. Used to avoid errors due to the 
+    /// circular reference in JSON. 
+    /// </summary>
     [JsonObject]
     public class QuizSimplifiedDto : Entity
     {

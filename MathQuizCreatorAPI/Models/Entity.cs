@@ -6,6 +6,16 @@ using Newtonsoft.Json;
 
 namespace MathQuizCreatorAPI.Models
 {
+
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This model is used so other models can inherit from it
+    /// and have a last modified time and creation time. 
+    /// </summary>
     [JsonObject]
     public class Entity
     {

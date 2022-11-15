@@ -9,6 +9,19 @@ using System.Text;
 
 namespace MathQuizCreatorAPI.Authentication
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// Token Service. Used to manage the JWT tokens used for authentication. 
+    /// It manages generating the JWT access and refresh token. It also manages
+    /// validating the tokens and regenerating them if they should be updated. 
+    /// 
+    /// The way this model is created and used is based on learning resources 
+    /// and experience from my previous co-op at Medic.
+    /// </summary>
     public class TokenService : ITokenService
     {
         private readonly AppDbContext _context;
@@ -25,7 +38,6 @@ namespace MathQuizCreatorAPI.Authentication
         public async Task<AuthenticationResponse> GenerateJwtTokenAndRefreshToken(ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
-            //var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
             var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
             var issuer = _config.GetSection("JWT:Issuer").Value;
             var audience = _config.GetSection("JWT:Audience").Value;
@@ -34,7 +46,6 @@ namespace MathQuizCreatorAPI.Authentication
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, user.Email),
-                //new Claim(ClaimTypes.Name, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
@@ -91,7 +102,6 @@ namespace MathQuizCreatorAPI.Authentication
 
         public async Task<AuthenticationResult> ValidateTokensAndGenerateJwtAndRefreshToken(TokenRequest tokenRequest)
         {
-            //var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
             var secretKey = Encoding.UTF8.GetBytes(_config.GetSection("JWT:SecretKey").Value);
             var issuer = _config.GetSection("JWT:Issuer").Value;
             var audience = _config.GetSection("JWT:Audience").Value;

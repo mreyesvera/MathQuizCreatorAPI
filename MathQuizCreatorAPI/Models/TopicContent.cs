@@ -5,6 +5,16 @@ using Newtonsoft.Json;
 
 namespace MathQuizCreatorAPI.Models
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This model represents a Topic Content, like Question or Quiz. 
+    /// It holds the topic id as well as the content title and
+    /// description.
+    /// </summary>
     public class TopicContent : Entity
     {
         private string? _title;

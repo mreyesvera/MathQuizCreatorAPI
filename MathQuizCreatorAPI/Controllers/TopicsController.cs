@@ -9,14 +9,23 @@ using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Cors;
 using MathQuizCreatorAPI.DTOs.Question;
-using MathQuizCreatorAPI.DTOs.QuizQuestion;
 using MathQuizCreatorAPI.DTOs.Topic;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
+using MathQuizCreatorAPI.DTOs.Quiz;
+using MathQuizCreatorAPI.DTOs.SolvedQuiz;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions for Topics.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -35,7 +44,7 @@ namespace MathQuizCreatorAPI.Controllers
 
         // GET: api/Topics
         [HttpGet]
-        [EnableCors("ReactApp")]
+        //[EnableCors("ReactApp")]
         public async Task<ActionResult<IEnumerable<TopicDeepDto>>> GetTopics(bool owner = false)
         {
             // TO DO: Later filter this by the user that is sending the request
@@ -62,7 +71,7 @@ namespace MathQuizCreatorAPI.Controllers
             foreach (var topic in topics)
             {
                 var questionsDto = new List<QuestionSimplifiedDto>();
-                foreach(var question in topic.Questions)
+                foreach (var question in topic.Questions)
                 {
                     if (question.Creator.Id == guidUserId)
                     {
@@ -79,9 +88,9 @@ namespace MathQuizCreatorAPI.Controllers
                 }
 
                 var quizzesDto = new List<QuizSimplifiedDto>();
-                foreach(var quiz in topic.Quizzes)
+                foreach (var quiz in topic.Quizzes)
                 {
-                    if(
+                    if (
                         (owner == true && quiz.Creator.Id == guidUserId) ||
                         (owner == false && (quiz.Creator.Id == guidUserId || quiz.IsPublic))
                         )
@@ -111,6 +120,106 @@ namespace MathQuizCreatorAPI.Controllers
             }
 
             return topicsDto;
+        }
+
+        // GET: api/Topics
+        [HttpGet("SolvedQuizzes")]
+        public async Task<ActionResult<IEnumerable<TopicSolvedQuizzesDto>>> GetTopicsSolvedQuizzes()
+        {
+            if(_httpContextAccessor.HttpContext == null 
+                || _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) == null)
+            {
+                return Unauthorized();
+            }
+
+            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            Guid guidUserId;
+
+            if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            {
+                return BadRequest("Unidentified user.");
+            }
+
+            var topics = await _context.Topics
+                .Include(topic => topic.Quizzes)
+                .ToListAsync();
+
+            if(topics == null || topics.Count == 0)
+            {
+                return NoContent();
+            }
+
+            var topicsSolvedQuizzes = new List<TopicSolvedQuizzesDto>();
+            for(int i=0; i<topics.Count; i++)
+            {
+                var topic = topics[i];
+                var topicQuizzes = topic.Quizzes.Select(quiz => quiz.QuizId).ToList();
+
+                var solvedQuizzes = await _context.SolvedQuizzes
+                        .Include(solvedQuiz => solvedQuiz.Quiz)
+                        .Include(solvedQuiz => solvedQuiz.User)
+                        .Where(solvedQuiz => solvedQuiz.Quiz.TopicId == topic.TopicId)
+                        .Where(solvedQuiz => solvedQuiz.Quiz.IsPublic)
+                        .Where(solvedQuiz => solvedQuiz.UserId == guidUserId)
+                        .Where(solvedQuiz => solvedQuiz.QuizId != null && topicQuizzes.Contains(solvedQuiz.QuizId ?? Guid.Empty))
+                        .ToListAsync();
+
+                var quizzesSolvedQuizzes = new List<QuizSolvedQuizzesDto>();
+
+                for(int j=0; j<solvedQuizzes.Count; j++)
+                {
+                    var solvedQuiz = solvedQuizzes[j];
+                    var solvedQuizSimplified = new SolvedQuizSimplifiedDto()
+                    {
+                        SolvedQuizId = solvedQuiz.SolvedQuizId,
+                        CorrectResponses = solvedQuiz.CorrectResponses,
+                        IncorrectResponses = solvedQuiz.IncorrectResponses,
+                        TotalQuestions = solvedQuiz.TotalQuestions,
+                        Score = solvedQuiz.Score
+                    };
+
+                    var quizSolvedQuizzes = quizzesSolvedQuizzes
+                        .Where(quizSolvedQuiz => quizSolvedQuiz.QuizId == solvedQuiz.QuizId)
+                        .ToList();
+
+                    QuizSolvedQuizzesDto quizSolvedQuiz;
+                    if(quizSolvedQuizzes == null || quizSolvedQuizzes.Count == 0)
+                    {
+                        quizSolvedQuiz = new QuizSolvedQuizzesDto()
+                        {
+                            QuizId = solvedQuiz.Quiz.QuizId,
+                            IsPublic = solvedQuiz.Quiz.IsPublic,
+                            HasUnlimitedMode = solvedQuiz.Quiz.HasUnlimitedMode,
+                            Title = solvedQuiz.Quiz.Title,
+                            Description = solvedQuiz.Quiz.Description,
+                            SolvedQuizzes = new List<SolvedQuizSimplifiedDto>()
+                        };
+
+                        quizSolvedQuiz.SolvedQuizzes.Add(solvedQuizSimplified);
+
+                        quizzesSolvedQuizzes.Add(quizSolvedQuiz);
+                    } 
+                    else
+                    {
+                        quizSolvedQuiz = quizSolvedQuizzes[0];
+                        quizSolvedQuiz.SolvedQuizzes.Add(solvedQuizSimplified);
+                    }
+                }
+
+
+                var topicSolvedQuiz = new TopicSolvedQuizzesDto()
+                {
+                    TopicId = topic.TopicId,
+                    Title = topic.Title,
+                    Quizzes = quizzesSolvedQuizzes
+                };
+
+                topicsSolvedQuizzes.Add(topicSolvedQuiz);
+
+            }
+
+            return topicsSolvedQuizzes;
+
         }
 
         // GET: api/Topics/5

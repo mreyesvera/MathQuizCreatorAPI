@@ -15,9 +15,18 @@ using MathQuizCreatorAPI.DTOs.Quiz;
 using MathQuizCreatorAPI.DTOs.QuizQuestion;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using MathQuizCreatorAPI.DTOs.Authentication;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions for Quizzes.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]

@@ -6,6 +6,16 @@ using Newtonsoft.Json;
 
 namespace MathQuizCreatorAPI.Models
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This model represents a Normal Distribution graph's settings. 
+    /// At the moment it's unused, but it would have been used for the
+    /// functionality of adding a normal distribution to questions. 
+    /// </summary>
     [JsonObject]
     public class NormalDistribution
     {
@@ -32,7 +42,7 @@ namespace MathQuizCreatorAPI.Models
             }
             set 
             {
-                if (!Enum.IsDefined(typeof(NormalDistributionType), value)) // might be unnecessary
+                if (!Enum.IsDefined(typeof(NormalDistributionType), value)) 
                 {
                     throw new ArgumentException("xorz should be one of the following values: " + Enum.GetValues(typeof(NormalDistributionType)));
                 }
@@ -53,7 +63,7 @@ namespace MathQuizCreatorAPI.Models
             }
             set
             {
-                if (DistributionType == NormalDistributionType.Z) // double check if this is ok?
+                if (DistributionType == NormalDistributionType.Z) 
                 {
                     if (value != 0)
                         throw new ArgumentException("In a z-distribution the mean should be 0");
@@ -75,7 +85,7 @@ namespace MathQuizCreatorAPI.Models
             }
             set
             {
-                if (DistributionType == NormalDistributionType.Z) // double check if this is ok?
+                if (DistributionType == NormalDistributionType.Z) 
                 {
                     if (value != 0)
                         throw new ArgumentException("In a z-distribution the standard deviation should be 1");

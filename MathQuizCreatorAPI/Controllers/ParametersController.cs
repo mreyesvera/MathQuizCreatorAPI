@@ -8,25 +8,69 @@ using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.Data;
 using MathQuizCreatorAPI.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions for Parmaeters.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
     public class ParametersController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ParametersController(AppDbContext context)
+        public ParametersController(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
+        /**
+         * Started working on this method, but may not need it
+         */ 
         // GET: api/Parameters
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Parameter>>> GetParameters()
+        //[Authorize(Roles = "Creator")]
+        public async Task<ActionResult<IEnumerable<Parameter>>> GetParameters(Guid questionId)
         {
+            //if (_httpContextAccessor.HttpContext == null
+            //    || _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) == null)
+            //{
+            //    return Unauthorized();
+            //}
+
+            //var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            //Guid guidUserId;
+
+            //if (userId == null || !Guid.TryParse(userId, out guidUserId))
+            //{
+            //    return BadRequest("Unidentified user.");
+            //}
+
+            //if(questionId == null)
+            //{
+            //    return BadRequest("Question Id can't be empty.");
+            //}
+
+            //var parameters = await _context.Parameters
+            //                    .Include(param => param.Question)
+            //                    .ThenInclude(question => question.Creator)
+            //                    .Where(param => param.QuestionId == questionId)
+            //                    .Where(param => param.Question.Creator.Id == guidUserId)
+            //                    .ToListAsync();
+
+
+            //return parameters;
+
             return await _context.Parameters.ToListAsync();
         }
 

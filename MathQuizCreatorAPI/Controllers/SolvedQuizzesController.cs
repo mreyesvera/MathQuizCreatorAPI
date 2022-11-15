@@ -12,9 +12,19 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using System.Linq.Expressions;
+using MathQuizCreatorAPI.DTOs.Quiz;
+using MathQuizCreatorAPI.DTOs.Topic;
 
 namespace MathQuizCreatorAPI.Controllers
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This controller manages actions for Solved Quizzes.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
@@ -88,7 +98,9 @@ namespace MathQuizCreatorAPI.Controllers
                     CorrectResponses = solvedQuiz.CorrectResponses,
                     IncorrectResponses = solvedQuiz.IncorrectResponses,
                     TotalQuestions = solvedQuiz.TotalQuestions,
-                    Score = solvedQuiz.Score
+                    Score = solvedQuiz.Score,
+                    CreationTime = solvedQuiz.CreationTime,
+                    LastModifiedTime = solvedQuiz.LastModifiedTime,
                 });
             }   
 

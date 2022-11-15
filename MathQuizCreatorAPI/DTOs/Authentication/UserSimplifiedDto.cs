@@ -1,8 +1,8 @@
 ﻿using MathQuizCreatorAPI.Models;
-using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace MathQuizCreatorAPI.DTOs.Question
+namespace MathQuizCreatorAPI.DTOs.Authentication
 {
     /// <summary>
     /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
@@ -10,21 +10,21 @@ namespace MathQuizCreatorAPI.DTOs.Question
     /// has been used without due acknowledgement and I have not made my work
     /// available to anyone else.
     /// 
-    /// Question Simplfied Safe Dto. Same as QuestionSimplifiedDto, 
-    /// but without the question's answer. 
+    /// User Simplified Dto. Used to transmit user data.
     /// </summary>
-    [JsonObject]
-    public class QuestionSimplifiedSafeDto : Entity
+    public class UserSimplifiedDto
     {
         [Required]
-        public Guid QuestionId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
-        public string Title { get; set; }
+        [EmailAddress]
+        public string? Email { get; set; }
 
         [Required]
-        public string Description { get; set; }
+        public string? UserName { get; set; }
 
-        public List<string> AssignedQuizzes { get; set; }
+        [Required]
+        public string? Role { get; set; }
     }
 }

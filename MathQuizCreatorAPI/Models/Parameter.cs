@@ -6,6 +6,21 @@ using Newtonsoft.Json;
 
 namespace MathQuizCreatorAPI.Models
 {
+    /// <summary>
+    /// I, Silvia Mariana Reyesvera Quijano, student number 000813686,
+    /// certify that this material is my original work. No other person's work
+    /// has been used without due acknowledgement and I have not made my work
+    /// available to anyone else.
+    /// 
+    /// This model is represents a Parameter set by a user when
+    /// creating a question. It holds the parameter name, the value
+    /// and the order it is in. 
+    /// 
+    /// For the future, it would be better to split it into another
+    /// model that holds the name of the Parameter. That way there
+    /// would be less repetition in the database and it would be
+    /// easier to handle the structure. 
+    /// </summary>
     [JsonObject]
     public class Parameter
     {

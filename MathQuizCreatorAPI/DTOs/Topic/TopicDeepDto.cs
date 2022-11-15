@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 using Microsoft.EntityFrameworkCore;
 using MathQuizCreatorAPI.DTOs.Question;
-using MathQuizCreatorAPI.DTOs.QuizQuestion;
+using MathQuizCreatorAPI.DTOs.Quiz;
 
 namespace MathQuizCreatorAPI.DTOs.Topic
 {
