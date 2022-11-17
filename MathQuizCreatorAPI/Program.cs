@@ -42,8 +42,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy( MyAllowSpecificOrigins,
         c =>
         {
-            c.WithOrigins("http://localhost:3000")
-            //c.WithOrigins("https://mathquizcreatorfe.azurewebsites.net")
+            //c.WithOrigins("http://localhost:3000")
+            c.WithOrigins("https://mathquizcreatorfe.azurewebsites.net")
                 .AllowAnyHeader()
                 .AllowAnyMethod();
                 //.AllowCredentials();
