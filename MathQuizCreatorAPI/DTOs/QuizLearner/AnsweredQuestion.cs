@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using MathQuizCreatorAPI.DTOs.Parameter;
+using System.ComponentModel.DataAnnotations;
 
 namespace MathQuizCreatorAPI.DTOs.QuizLearner
 {
@@ -17,5 +18,8 @@ namespace MathQuizCreatorAPI.DTOs.QuizLearner
 
         [Required]
         public string Answer { get; set; }
+
+        [Required]
+        public List<ParameterSimplifiedSafeDto>? Parameters { get; set; }
     }
 }

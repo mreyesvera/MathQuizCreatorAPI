@@ -44,7 +44,6 @@ namespace MathQuizCreatorAPI.Controllers
             return await _context.QuizQuestions.ToListAsync();
         }*/
 
-        // Not needed at the moment
         // GET: api/QuizQuestions/5
         [HttpGet("{id}")]
         public async Task<ActionResult<QuizQuestionSimplifiedDto>> GetQuizQuestion(Guid id)
@@ -104,7 +103,7 @@ namespace MathQuizCreatorAPI.Controllers
         {
             try
             {
-                if (id != quizQuestionEdit.QuizId)
+                if (id != quizQuestionEdit.QuizQuestionId)
                 {
                     return BadRequest();
                 }
@@ -145,6 +144,8 @@ namespace MathQuizCreatorAPI.Controllers
                 {
                     return BadRequest("Can't assign question of different topic to quiz.");
                 }
+
+                quizQuestion.Order = quizQuestionEdit.Order;
 
                 _context.Entry(quizQuestion).State = EntityState.Modified;
 
@@ -252,7 +253,7 @@ namespace MathQuizCreatorAPI.Controllers
                     Order = quizQuestion.Order
                 };
 
-                return CreatedAtAction("GetQuizQuestion", new { id = quizQuestion.QuizQuestionId }, quizQuestion);
+                return CreatedAtAction("GetQuizQuestion", new { id = quizQuestion.QuizQuestionId }, quizQuestionSimplified);
             }
             catch (Exception)
             {

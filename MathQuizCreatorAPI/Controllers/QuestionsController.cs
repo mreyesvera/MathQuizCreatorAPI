@@ -120,6 +120,184 @@ namespace MathQuizCreatorAPI.Controllers
         }
 
         /// <summary>
+        /// Replaces the available parameters in the provided text,
+        /// and returns it. 
+        /// </summary>
+        /// <param name="text">Text to use for replacements</param>
+        /// <param name="parameters">Parameters used for the replacements</param>
+        /// <returns>Text with substituted parameters</returns>
+        public static string ReplaceParametersInString(string text, List<Parameter> parameters)
+        {
+            var newText = text;
+
+            for(int i = 0; i<parameters.Count; i++)
+            {
+                var param = parameters[i];
+
+                newText = newText.Replace("${" + param.Name + "}", param.Value);
+            }
+
+            return newText;
+        }
+
+        /// <summary>
+        /// Returns a simplified question with parameter substitutions 
+        /// using a randomly chosen set of the available parameters. 
+        /// </summary>
+        /// <param name="question">question to parametrize</param>
+        /// <param name="parameters">available question parameters to choose from</param>
+        /// <returns>question with parameter substitutions</returns>
+        public static QuestionSimplifiedSafeDto ParametrizeQuestionSimplified(Question question, List<Parameter> parameters)
+        {
+            Random random = new Random();
+
+            var distinctOrders = parameters.Select(parameter => parameter.Order).Distinct().ToList();
+            var randomOrder = random.Next(1, distinctOrders.Count + 1);
+            var chosenParameters = parameters.Where(parameter => parameter.Order == randomOrder).ToList();
+            var chosenParametersSimplified = new List<ParameterSimplifiedSafeDto>();
+
+            foreach (var chosenParam in chosenParameters)
+            {
+                chosenParametersSimplified.Add(new ParameterSimplifiedSafeDto()
+                {
+                    ParameterId = chosenParam.ParameterId,
+                    Order = chosenParam.Order
+                });
+            }
+
+            var questionParametrized = new QuestionSimplifiedSafeDto()
+            {
+                QuestionId = question.QuestionId,
+                Title = question.Title,
+                Description = ReplaceParametersInString(question.Description, chosenParameters),
+                LastModifiedTime = question.LastModifiedTime,
+                CreationTime = question.CreationTime,
+                Parameters = chosenParametersSimplified
+            };
+
+            return questionParametrized;
+        }
+
+        /// <summary>
+        /// Returns a detailed question with parameter substitutions 
+        /// using a randomly chosen set of the available parameters. 
+        /// </summary>
+        /// <param name="question">question to parametrize</param>
+        /// <param name="parameters">available question parameters to choose from</param>
+        /// <returns>question with parameter substitutions</returns>
+        private static QuestionDeepParametrizedDto ParametrizeQuestion(Question question, List<Parameter> parameters)
+        {
+            Random random = new Random();
+
+            var distinctOrders = parameters.Select(parameter => parameter.Order).Distinct().ToList();
+            var randomOrder = random.Next(1, distinctOrders.Count + 1);
+            var chosenParameters = parameters.Where(parameter => parameter.Order == randomOrder).ToList();
+            var chosenParametersSimplified = new List<ParameterSimplifiedSafeDto>();
+
+            foreach(var chosenParam in chosenParameters)
+            {
+                chosenParametersSimplified.Add(new ParameterSimplifiedSafeDto()
+                {
+                    ParameterId = chosenParam.ParameterId,
+                    Order = chosenParam.Order
+                });
+            }
+
+            var questionParametrized = new QuestionDeepParametrizedDto()
+            {
+                QuestionId = question.QuestionId,
+                Title = question.Title,
+                Description = ReplaceParametersInString(question.Description, chosenParameters),
+                Answer = ReplaceParametersInString(question.Answer, chosenParameters),
+                Topic = new TopicSimplifiedDto()
+                {
+                    TopicId = question.Topic.TopicId,
+                    Title = question.Topic.Title
+                },
+                LastModifiedTime = question.LastModifiedTime,
+                CreationTime = question.CreationTime,
+                Parameters = chosenParametersSimplified
+            };
+
+            return questionParametrized;
+        }
+
+        /// <summary>
+        /// Returns a question but where the question has been parametrized,
+        /// meaning a randomly chosen set of values from the available parameters
+        /// has been substitutted into the question. 
+        /// </summary>
+        /// <param name="id">id of the question to return</param>
+        /// <returns>question with parameter substitutions</returns>
+        [HttpGet("Parametrized/{id}")]
+        public async Task<ActionResult<QuestionDeepParametrizedDto>> GetParametrizedQuestion(Guid id)
+        {
+            try
+            {
+                if (_httpContextAccessor.HttpContext == null
+                || _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier) == null)
+                {
+                    return Unauthorized();
+                }
+
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                Guid guidUserId;
+
+                if (userId == null || !Guid.TryParse(userId, out guidUserId))
+                {
+                    return BadRequest("Unidentified user.");
+                }
+
+                var question = await _context.Questions
+                    .Include(question => question.Topic)
+                    .Include(question => question.Creator)
+                    .Where(question => question.QuestionId == id)
+                    .Where(question => question.Creator.Id == guidUserId)
+                    .FirstOrDefaultAsync();
+
+                if (question == null)
+                {
+                    return NotFound();
+                }
+
+                var parameters = await _context.Parameters
+                                    .Include(param => param.Question)
+                                    .ThenInclude(question => question.Creator)
+                                    .Where(param => param.QuestionId == id)
+                                    .Where(param => param.Question.Creator.Id == guidUserId)
+                                    .ToListAsync();
+
+                if(parameters == null || parameters.Count == 0)
+                {
+                    var questionDeep = new QuestionDeepParametrizedDto()
+                    {
+                        QuestionId = question.QuestionId,
+                        Title = question.Title,
+                        Description = question.Description,
+                        Answer = question.Answer,
+                        Topic = new TopicSimplifiedDto()
+                        {
+                            TopicId = question.Topic.TopicId,
+                            Title = question.Topic.Title
+                        },
+                        LastModifiedTime = question.LastModifiedTime,
+                        CreationTime = question.CreationTime,
+                        Parameters = new List<ParameterSimplifiedSafeDto>()
+                    };
+
+                    return questionDeep;
+                }
+
+                return ParametrizeQuestion(question, parameters);
+
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server Error");
+            }
+        }
+
+        /// <summary>
         /// Returns a question created by the user based on the provided id. 
         /// </summary>
         /// <param name="id">Question id to look for</param>
@@ -210,7 +388,6 @@ namespace MathQuizCreatorAPI.Controllers
         // PUT: api/Questions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Creator")]
         public async Task<IActionResult> PutQuestion(Guid id, QuestionEditDto questionEdit)
         {
             try
@@ -283,7 +460,6 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Questions
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        //[Authorize(Roles = "Creator")]
         public async Task<ActionResult<QuestionSimplifiedDto>> PostQuestion(QuestionAddDto questionAdd)
         {
             try
@@ -354,12 +530,15 @@ namespace MathQuizCreatorAPI.Controllers
         /// <returns>no content if succeeded or error otherwise</returns>
         // DELETE: api/Questions/5
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Creator")]
         public async Task<IActionResult> DeleteQuestion(Guid id)
         {
             try
             {
-                var question = await _context.Questions.FindAsync(id);
+                var question = await _context.Questions
+                    .Include(question => question.Creator)
+                    .Where(question => question.QuestionId == id)
+                    .FirstOrDefaultAsync();
+
                 if (question == null)
                 {
                     return NotFound();
@@ -378,6 +557,30 @@ namespace MathQuizCreatorAPI.Controllers
                     return Unauthorized();
                 }
 
+                var assignedQuizzes = await _context.QuizQuestions
+                    .Where(quizQuestion => quizQuestion.QuestionId == question.QuestionId)
+                    .Include(quizQuestion => quizQuestion.Quiz)
+                    .ToListAsync();
+
+                if(assignedQuizzes != null && assignedQuizzes.Count > 0)
+                {
+                    foreach(var assignedQuiz in assignedQuizzes)
+                    {
+                        var quizQuestions = await _context.QuizQuestions
+                            .Where(quizQuestion => quizQuestion.QuizId == assignedQuiz.QuizId)
+                            .OrderBy(quizQuestion => quizQuestion.Order)
+                            .ToListAsync();
+
+                        for(int i=0; i<quizQuestions.Count; i++)
+                        {
+                            var quizQuestion = quizQuestions[i];
+                            quizQuestion.Order = i + 1;
+
+                            _context.Entry(quizQuestion).State = EntityState.Modified;
+                        }
+
+                    }
+                }
 
                 _context.Questions.Remove(question);
                 await _context.SaveChangesAsync();

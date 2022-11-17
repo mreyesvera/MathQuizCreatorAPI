@@ -46,7 +46,7 @@ namespace MathQuizCreatorAPI.Controllers
         /// </summary>
         /// <param name="questionId">question id of question to look for</param>
         /// <returns>found question simplified</returns>
-        /*private async Task<QuestionSimplifiedDto> GetQuestionSimplified(Guid? questionId)
+        private async Task<QuestionSimplifiedDto> GetQuestionSimplified(Guid? questionId)
         {
             var question = await _context.Questions.Where(question => question.QuestionId == questionId).FirstOrDefaultAsync();
 
@@ -65,7 +65,7 @@ namespace MathQuizCreatorAPI.Controllers
             };
 
             return questionSimplified;
-        }*/
+        }
 
         // Not needed at the moment
         // GET: api/Quizzes
@@ -96,7 +96,7 @@ namespace MathQuizCreatorAPI.Controllers
         /// </summary>
         /// <param name="quizId">Quiz id to filter quiz questions for</param>
         /// <returns>List of quiz questions with the detailed quesiton</returns>
-        /*private async Task<List<QuizQuestionQuestionDeepDto>> GetQuizQuestionsQuestionDeep(Guid quizId)
+        private async Task<List<QuizQuestionQuestionDeepDto>> GetQuizQuestionsQuestionDeep(Guid quizId)
         {
             var quizQuestions = await _context.QuizQuestions.Where(quizQuestion => quizQuestion.QuizId == quizId).ToListAsync();
 
@@ -115,51 +115,76 @@ namespace MathQuizCreatorAPI.Controllers
             }
 
             return quizQuestionsQuestions;
-        }*/
+        }
 
+        /// <summary>
+        /// Returns a quiz from the provided id.
+        /// </summary>
+        /// <param name="id">quiz id of quiz to look for</param>
+        /// <returns>quiz that matches the provided id</returns>
         // GET: api/Quizzes/5
-        /*[HttpGet("{id}")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<QuizDeepDto>> GetQuiz(Guid id)
         {
-            var quiz = await _context.Quizzes
+            try
+            {
+                var quiz = await _context.Quizzes
                 .Where(quiz => quiz.QuizId == id)
                 .Include(quiz => quiz.Topic)
                 .Include(quiz => quiz.QuizQuestions)
                 .Include(quiz => quiz.Creator)
                 .FirstOrDefaultAsync();
 
-            if (quiz == null)
-            {
-                return NotFound();
+                if (quiz == null)
+                {
+                    return NotFound();
+                }
+
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                Guid guidUserId;
+
+                if (userId == null || !Guid.TryParse(userId, out guidUserId))
+                {
+                    return BadRequest("Unidentified user.");
+                }
+
+                if (quiz.Creator.Id != guidUserId)
+                {
+                    return Unauthorized();
+                }
+
+                var quizDeep = new QuizDeepDto()
+                {
+                    QuizId = quiz.QuizId,
+                    Title = quiz.Title,
+                    Description = quiz.Description,
+                    IsPublic = quiz.IsPublic,
+                    HasUnlimitedMode = quiz.HasUnlimitedMode,
+                    LastModifiedTime = quiz.LastModifiedTime,
+                    CreationTime = quiz.CreationTime,
+                    Topic = new TopicSimplifiedDto()
+                    {
+                        TopicId = quiz.Topic.TopicId,
+                        Title = quiz.Topic.Title
+                    },
+                    Creator = new UserSimplifiedDto()
+                    {
+                        UserId = quiz.Creator.Id,
+                        Email = quiz.Creator.Email,
+                        UserName = quiz.Creator.UserName,
+                    },
+                    QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
+
+                };
+
+
+                return quizDeep;
             }
-
-            var quizDeep = new QuizDeepDto()
+            catch (Exception)
             {
-                QuizId = quiz.QuizId,
-                Title = quiz.Title,
-                Description = quiz.Description,
-                IsPublic = quiz.IsPublic,
-                HasUnlimitedMode = quiz.HasUnlimitedMode,
-                LastModifiedTime = quiz.LastModifiedTime,
-                CreationTime = quiz.CreationTime,
-                Topic = new TopicSimplifiedDto()
-                {
-                    TopicId = quiz.Topic.TopicId,
-                    Title = quiz.Topic.Title
-                },
-                Creator = new UserSimplifiedDto()
-                {
-                    UserId = quiz.Creator.Id,
-                    Email = quiz.Creator.Email,
-                    UserName = quiz.Creator.UserName,
-                },
-                QuizQuestions = await GetQuizQuestionsQuestionDeep(quiz.QuizId)
-
-            };
-
-
-            return quizDeep;
-        }*/
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server Error");
+            }
+        }
 
         /// <summary>
         /// Updates a quiz for the provided id with the provided editted quiz.
@@ -170,7 +195,6 @@ namespace MathQuizCreatorAPI.Controllers
         // PUT: api/Quizzes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        //[Authorize(Roles = "Creator")]
         public async Task<IActionResult> PutQuiz(Guid id, QuizEditDto quizEdit)
         {
             try
@@ -242,7 +266,6 @@ namespace MathQuizCreatorAPI.Controllers
         // POST: api/Quizzes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        //[Authorize(Roles = "Creator")]
         public async Task<ActionResult<QuizSimplifiedDto>> PostQuiz(QuizAddDto quizAdd)
         {
             try
@@ -313,12 +336,15 @@ namespace MathQuizCreatorAPI.Controllers
         /// <returns>no content if successful, error otherwise</returns>
         // DELETE: api/Quizzes/5
         [HttpDelete("{id}")]
-        //[Authorize(Roles = "Creator")]
         public async Task<IActionResult> DeleteQuiz(Guid id)
         {
             try
             {
-                var quiz = await _context.Quizzes.FindAsync(id);
+                var quiz = await _context.Quizzes
+                    .Include(quiz => quiz.Creator)
+                    .Where(quiz => quiz.QuizId == id)
+                    .FirstOrDefaultAsync();
+
                 if (quiz == null)
                 {
                     return NotFound();

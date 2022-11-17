@@ -1,4 +1,5 @@
-﻿using MathQuizCreatorAPI.Models;
+﻿using MathQuizCreatorAPI.DTOs.Parameter;
+using MathQuizCreatorAPI.Models;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
@@ -26,5 +27,7 @@ namespace MathQuizCreatorAPI.DTOs.Question
         public string Description { get; set; }
 
         public List<string> AssignedQuizzes { get; set; }
+
+        public List<ParameterSimplifiedSafeDto> Parameters { get; set; }
     }
 }

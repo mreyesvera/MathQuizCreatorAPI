@@ -62,13 +62,16 @@ namespace MathQuizCreatorAPI.Controllers
                 return null;
             }
 
-            var questionSimplified = new QuestionSimplifiedSafeDto()
-            {
-                QuestionId = questionId ?? Guid.Empty,
-                Title = question.Title,
-                Description = question.Description,
-                AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, questionId ?? Guid.Empty)
-            };
+            var parameters = await _context.Parameters
+                                    .Include(param => param.Question)
+                                    .ThenInclude(question => question.Creator)
+                                    .Where(param => param.QuestionId == question.QuestionId)
+                                    .ToListAsync();
+
+            var questionSimplified = QuestionsController.ParametrizeQuestionSimplified(question, parameters);
+
+            questionSimplified.AssignedQuizzes = await QuestionsController.GetAssignedQuizzes(_context, questionId ?? Guid.Empty);
+
 
             return questionSimplified;
         }
@@ -169,34 +172,21 @@ namespace MathQuizCreatorAPI.Controllers
         }
 
         /// <summary>
-        /// Returned the answer once parameters have been substituted. 
-        /// </summary>
-        /// <param name="correctAnswer">correct answer</param>
-        /// <param name="parameters">available parameters for question</param>
-        /// <returns>correct answer adapted to parameters</returns>
-        // Adapt to parametrization
-        private static string GetParametrizedAnswer(string correctAnswer, List<Parameter> parameters)
-        {
-            if (parameters != null && parameters.Count > 0)
-            {
-                // DO PARAMETER LOGIC HERE
-            }
-
-            return correctAnswer;
-        }
-
-        /// <summary>
         /// Grades a provided answered question using the provided question.
         /// </summary>
         /// <param name="answeredQuestion">user answered question</param>
         /// <param name="question">saved question</param>
         /// <returns>graded answered question</returns>
-        // Will need to adapt to parametrization
         private async Task<AnsweredQuestionGraded> GradeQuestion(AnsweredQuestion answeredQuestion, Question question)
         {
-            var parameters = await _context.Parameters.Where(p => p.QuestionId == question.QuestionId).ToListAsync();
+            var parameterIds = answeredQuestion.Parameters.Select(parameter => parameter.ParameterId);
 
-            var correctAnswer = GetParametrizedAnswer(question.Answer, parameters);
+            var parameters = await _context.Parameters
+                .Where(p => p.QuestionId == question.QuestionId)
+                .Where(p => parameterIds.Contains(p.ParameterId))
+                .ToListAsync();
+
+            var correctAnswer = QuestionsController.ReplaceParametersInString(question.Answer, parameters);
 
             var correct = answeredQuestion.Answer == correctAnswer;
 
