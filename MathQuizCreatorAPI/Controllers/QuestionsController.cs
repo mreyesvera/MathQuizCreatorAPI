@@ -582,6 +582,15 @@ namespace MathQuizCreatorAPI.Controllers
                     }
                 }
 
+                var parameters = await _context.Parameters
+                    .Where(parameter => parameter.QuestionId == id)
+                    .ToListAsync();
+
+                foreach(var param in parameters)
+                {
+                    _context.Parameters.Remove(param);
+                }
+
                 _context.Questions.Remove(question);
                 await _context.SaveChangesAsync();
 

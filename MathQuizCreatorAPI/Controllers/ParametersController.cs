@@ -297,7 +297,7 @@ namespace MathQuizCreatorAPI.Controllers
             try
             {
                 var parameter = await _context.Parameters
-                    .Where(parameter => parameter.QuestionId == id)
+                    .Where(parameter => parameter.ParameterId == id)
                     .Include(parameter => parameter.Question)
                     .ThenInclude(question => question.Creator)
                     .FirstOrDefaultAsync();
