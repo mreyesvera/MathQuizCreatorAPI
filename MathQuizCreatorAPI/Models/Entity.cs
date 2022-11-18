@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace MathQuizCreatorAPI.Models
 {
@@ -32,7 +33,8 @@ namespace MathQuizCreatorAPI.Models
             get
             {
                 //return LastModifiedTime.ToString("o");
-                return LastModifiedTime.Date.ToShortDateString();
+                //return LastModifiedTime.Date.ToShortDateString();
+                return LastModifiedTime.Date.ToString("yyyy-MM-dd");
             }
             set
             {
@@ -51,7 +53,8 @@ namespace MathQuizCreatorAPI.Models
             get
             {
                 //return CreationTime.ToString("o");
-                return CreationTime.Date.ToShortDateString();
+                //return CreationTime.Date.ToShortDateString();
+                return LastModifiedTime.Date.ToString("yyyy-MM-dd");
             }
             set
             {
